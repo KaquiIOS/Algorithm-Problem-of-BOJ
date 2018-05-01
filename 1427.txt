@@ -1,0 +1,128 @@
+소트인사이드 성공 
+
+문제
+배열을 정렬하는 것은 쉽다. 수가 주어지면, 그 수의 각 자리수를 내림차순으로 정렬해보자.
+
+입력
+첫째 줄에 정렬하고자하는 수 N이 주어진다. N은 1,000,000,000보다 작거나 같은 자연수이다.
+
+출력
+첫째 줄에 자리수를 내림차순으로 정렬한 수를 출력한다.
+
+예제 입력 1  복사
+2143
+
+예제 출력 1  복사
+4321
+
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.StringTokenizer;
+
+
+// Submission Template
+
+public class Main {
+    public static void main(String args[]) throws Exception{
+
+        FastScanner fs = new FastScanner();
+
+        String val = fs.nextLine();
+
+        int[] input = new int[val.length()];
+
+		// String 입력을 int 입력으로 변환
+        for(int i = 0; i < input.length; ++i)
+            input[i] = (val.charAt(i));
+
+		// 내림차순으로 정렬하기
+        Sort.mergeSort(input, false);
+
+		// 정렬 후 출력
+        for(int i = 0; i < input.length; ++i)
+            System.out.print(Character.toChars(input[i]));
+    }
+}
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+    }
+}
+
+class Sort {
+
+    /*
+     * Method      : mergeSort
+     * Parameter   : input : int[], asc : boolean
+     * Description : 외부에서 접근하기위해 만들어 놓은 병합정렬 메소드. asc = true(오름차순) / false(내림차순)
+     */
+    public final static void mergeSort(int input[], boolean asc) {
+
+        int left = 0, right = input.length - 1;
+
+        mergeSort(input, left, right, asc);
+    }
+
+    /*
+     * Method      : mergeSort
+     * Parameter   : input : int[], left : int, right : int, asc : boolean
+     * Description : 입력을 반으로 나눌 수 없을 때 까지 나눈 후 merge 함수를 호출하여 부분 정렬. asc 로 정렬 순서 선택
+     * TimeSpace   :
+     */
+    private final static void mergeSort(int[] input, int left, int right, boolean asc) {
+
+        if(left < right) {
+
+            int pivot = (left + right)/2;
+
+            mergeSort(input, left, pivot, asc);
+            mergeSort(input, pivot + 1, right, asc);
+            merge(input, left, pivot, right, asc);
+        }
+    }
+
+    /*
+     * Method      : merge
+     * Parameter   : input : int[], left : int, pivot : int, right : int, asc : boolean
+     * Description : 두개로 나뉜 입력을 크기 순서대로 재배열한다. asc 로 정렬 순서 선택
+     */
+    private final static void merge(int[] input, int left, int pivot, int right, boolean asc) {
+
+        int l = left, p = pivot + 1, r = right, count = 0;
+
+        int[] tmp = new int[right - left + 1];
+
+        while(l <= pivot && p <= right) {
+            if(asc == true)
+                tmp[count++] = (input[l] < input[p] ? input[l++] : input[p++]);
+            else
+                tmp[count++] = (input[l] > input[p] ? input[l++] : input[p++]);
+        }
+
+        for(; l <= pivot; ++l, ++count)
+            tmp[count] = input[l];
+        for(; p <= right; ++p, ++count)
+            tmp[count] = input[p];
+
+        for(int i = left, k = 0; i <= right; ++i, ++k)
+            input[i] = tmp[k];
+    }
+}
+

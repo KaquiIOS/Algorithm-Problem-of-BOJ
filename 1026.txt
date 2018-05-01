@@ -1,0 +1,157 @@
+1026 : 보물 성공 
+
+문제
+옛날 옛적에 수학이 항상 큰 골칫거리였던 나라가 있었다. 이 나라의 국왕 김지민은 다음과 같은 문제를 내고 큰 상금을 걸었다.
+
+길이가 N인 정수 배열 A와 B가 있다. 다음과 같이 함수 S를 정의하자.
+
+S = A[0]*B[0] + ... + A[N-1]*B[N-1]
+
+S의 값을 가장 작게 만들기 위해 A의 수를 재배열하자. 단, B에 있는 수는 재배열하면 안된다.
+
+S의 최솟값을 출력하는 프로그램을 작성하시오.
+
+입력
+첫째 줄에 N이 주어진다. 둘째 줄에는 A에 있는 N개의 수가 순서대로 주어지고, 셋째 줄에는 B에 있는 수가 순서대로 주어진다. N은 50보다 작거나 같은 자연수이고, A와 B의 각 원소는 100보다 작거나 같은 음이 아닌 정수이다.
+
+출력
+첫째 줄에 S의 최솟값을 출력한다.
+
+예제 입력 1
+5
+1 1 1 6 0
+2 7 8 3 1
+
+예제 출력 1
+18
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.StringTokenizer;
+
+
+// Submission Template
+
+public class Main {
+    public static void main(String args[]) throws Exception{
+
+        FastScanner fs = new FastScanner();
+
+        int t_case = fs.nextInt();
+
+        int[] A = new int[t_case];
+        int[] B = new int[t_case];
+
+        for(int i = 0; i < t_case; ++i)
+            A[i] = fs.nextInt();
+
+        for(int i = 0; i < t_case; ++i)
+            B[i] = fs.nextInt();
+
+        Sort.mergeSort(A, true);
+        Sort.mergeSort(B, false);
+
+        int sum = 0;
+
+        for(int i = 0; i < t_case; ++i)
+            sum += A[i] * B[i];
+
+        System.out.println(sum);
+    }
+}
+
+// BufferedReader 와 StringTokenizer 를 이용하여 빠르게 입력 받기
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+    }
+}
+
+class Sort {
+
+    /*
+     * Method      : mergeSort
+     * Parameter   : input : int[], asc : boolean
+     * Description : 외부에서 접근하기위해 만들어 놓은 병합정렬 메소드. asc = true(오름차순) / false(내림차순)
+     */
+    public final static void mergeSort(int input[], boolean asc) {
+
+		// 초기 left, right 는 배열의 양 끝쪽으로 설정
+        int left = 0, right = input.length - 1;
+		
+		// 합병정렬 수행
+        mergeSort(input, left, right, asc);
+    }
+
+    /*
+     * Method      : mergeSort
+     * Parameter   : input : int[], left : int, right : int, asc : boolean
+     * Description : 입력을 반으로 나눌 수 없을 때 까지 나눈 후 merge 함수를 호출하여 부분 정렬. asc 로 정렬 순서 선택
+     * TimeSpace   :
+     */
+    private final static void mergeSort(int[] input, int left, int right, boolean asc) {
+
+		// 더이상 갈라지지 않으면 무시
+        if(left < right) {
+
+		    // 중앙 위치 설정
+            int pivot = (left + right)/2;
+
+			// 왼쪽 배열
+            mergeSort(input, left, pivot, asc);
+			
+			// 오른쪽 배열
+            mergeSort(input, pivot + 1, right, asc);
+			
+			// 왼쪽 오른쪽 배열 정렬
+            merge(input, left, pivot, right, asc);
+        }
+    }
+
+    /*
+     * Method      : merge
+     * Parameter   : input : int[], left : int, pivot : int, right : int, asc : boolean
+     * Description : 두개로 나뉜 입력을 크기 순서대로 재배열한다. asc 로 정렬 순서 선택
+     */
+    private final static void merge(int[] input, int left, int pivot, int right, boolean asc) {
+
+        int l = left, p = pivot + 1, r = right, count = 0;
+
+		// 필요한 크기만 생성
+        int[] tmp = new int[right - left + 1];
+
+		// 왼쪽, 오른쪽 배열 원소 비교 후 정렬
+        while(l <= pivot && p <= right) {
+            if(asc == true)
+                tmp[count++] = (input[l] < input[p] ? input[l++] : input[p++]);
+            else
+                tmp[count++] = (input[l] > input[p] ? input[l++] : input[p++]);
+        }
+
+		// 잔여 원소들 채우기
+        for(; l <= pivot; ++l, ++count)
+            tmp[count] = input[l];
+        for(; p <= right; ++p, ++count)
+            tmp[count] = input[p];
+
+		// 원래 배열에 정렬된 값 입력
+        for(int i = left, k = 0; i <= right; ++i, ++k)
+            input[i] = tmp[k];
+    }
+}
