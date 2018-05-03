@@ -1,0 +1,293 @@
+단어 정렬
+
+* 기존에 만들어 둔 HeapSort를 String 버전으로 변경하여 정렬 수행.
+* 중복되는 값은 HashSet 을 이용하여 삭제한 후 toArray 를 이용하여 단어 배열 생성
+* 생성된 배열을 이용하여 정렬 수행 후 출력.
+
+* 매번 만들어둔 알고리즘을 변경할 수 없으니 Comparator 과 같은 비교 클래스들을 잘 알아 둘 필요가 있다.
+
+
+
+문제
+알파벳 소문자로 이루어진 N개의 단어가 들어오면 아래와 같은 조건에 따라 정렬하는 프로그램을 작성하시오.
+
+길이가 짧은 것부터
+길이가 같으면 사전 순으로
+입력
+첫째 줄에 단어의 개수 N이 주어진다. (1≤N≤20,000) 둘째 줄부터 N개의 줄에 걸쳐 알파벳 소문자로 이루어진 단어가 한 줄에 하나씩 주어진다. 주어지는 문자열의 길이는 50을 넘지 않는다.
+ 
+
+출력
+조건에 따라 정렬하여 단어들을 출력한다. 단, 같은 단어가 여러 번 입력된 경우에는 한 번씩만 출력한다.
+ 
+
+예제 입력 1  복사
+13
+but
+i
+wont
+hesitate
+no
+more
+no
+more
+it
+cannot
+wait
+im
+yours
+
+예제 출력 1  복사
+i
+im
+it
+no
+but
+more
+wait
+wont
+yours
+cannot
+hesitate
+
+/* Comparator 를 이용하여 Sort Function 작성 */
+
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    final static int MAX_SIZE = 10001;
+
+    public static void main(String args[]) throws Exception{
+
+        FastScanner fs = new FastScanner();
+
+        int testCase = fs.nextInt();
+
+        Set<String> t = new HashSet<>();
+
+        for(int i = 0; i < testCase; ++i)
+            t.add(fs.nextLine());
+
+        String[] input = new String[t.size()];
+        t.toArray(input);
+
+        Arrays.sort(input, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+
+                int leng1 = o1.length();
+                int leng2 = o2.length();
+
+                // 길이가 같으면 사전순 확인
+                if(o1.length() == o2.length()) {
+                    for(int i = 0; i < leng1; ++i)
+                        if(o1.charAt(i) != o2.charAt(i))
+                            return o1.charAt(i) - o2.charAt(i);
+                }
+
+                return leng1 - leng2;
+            }
+        });
+
+        OutputStream out = new BufferedOutputStream(System.out);
+        for(int i = 0; i < input.length; ++i)
+            System.out.println(input[i]);
+
+        out.flush();
+    }
+
+
+}
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+    }
+}
+
+/* 기존에 만들어 둔 Heap Sort를 String에 맞게 변경하여 정렬 */
+
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    final static int MAX_SIZE = 10001;
+
+    public static void main(String args[]) throws Exception{
+
+        FastScanner fs = new FastScanner();
+
+        int testCase = fs.nextInt();
+
+        Set<String> t = new HashSet<>();
+
+        for(int i = 0; i < testCase; ++i)
+            t.add(fs.nextLine());
+
+        String[] input = new String[t.size()];
+        t.toArray(input);
+
+        int size = t.size();
+
+        Sort.heapSort(input, true);
+
+        OutputStream out = new BufferedOutputStream(System.out);
+        for(int i = 0; i < size; ++i)
+            System.out.println(input[i]);
+
+        out.flush();
+    }
+
+
+}
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+    }
+}
+
+class Sort {
+
+    private static void swap(int idx1, int idx2, String[] input) {
+        // 같은 인덱스면 return
+        if(idx1 == idx2) return;
+        // Swap
+        String tmp = input[idx1];
+        input[idx1] = input[idx2];
+        input[idx2] = tmp;
+    }
+
+    private static void reverse(String[] input) {
+
+        int left = 0, right = input.length - 1;
+
+        while(left < right)
+            swap(left++, right--, input);
+    }
+
+    /*
+     * Method      : heapSort
+     * Parameter   : input : int[], asc : boolean
+     * Description : 외부에서 접근하기 위해 만들어 놓은 heapSort 함수. asc = true/false (오름차순/내림차순)
+     */
+    public final static void heapSort(String[] input, boolean asc) {
+
+        // input 을 Heap 에 맞게 변경
+        buildHeap(input);
+        // Heap 이 된 input 을 정렬
+        heapSort(input);
+
+        // 내림차순으로 정렬되기 때문에 asc == True 인 경우만 역순으로 배치
+        if(asc)
+            reverse(input);
+        //ArrayUtils.reverse(input);
+    }
+
+    /*
+     * Method      : heapSort
+     * Parameter   : input : int[]
+     * Description : heap의 형태를 만든 후, 루트노드를 반복적으로 POP 수행 -> 정렬된 배열 생성.
+     */
+    private final static void heapSort(String[] input) {
+
+        int numOfNodes = input.length - 1;
+        // POP 한 노드를 맨 마지막 노드의 위치로 보내기 => 반복문 실행 후 내림차순으로 input이 정렬됨.
+        for(int i = numOfNodes, j = 0; i >= 0; --i, ++j) {
+            swap(0, i, input);
+            heapify(input,0, input.length - j - 1);
+        }
+    }
+
+    /*
+     * Method      : buildHeap
+     * Parameter   : input : int[]
+     * Description : 자식을 가질 수 있는 Level 부터 각각의 서브트리를 Heap 형태로 변경
+     */
+    private final static void buildHeap(String[] input) {
+
+        // 배열이 0부터 시작하기에 - 1 을 한다.
+        // 리프노드 Level 을 제외한 줄부터 Heap 에 맞게 변경
+        int parNodeIdx = (input.length - 1) / 2;
+
+        // Heap 에 맞게 변경
+        for(int i = parNodeIdx; i >= 0; --i)
+            heapify(input, i, input.length);
+    }
+
+    /*
+     * Method      : heapify
+     * Parameter   : input : int[], parNode : int, length : int
+     * Description : 부모노드(parNode)를 루트노드로 하는 서브트리를 Heap 에 맞게 변경
+     */
+    private final static void heapify(String[] input, int parNode, int length) {
+
+        int smaller, leftChild = parNode * 2 + 1, rightChild = parNode * 2 + 2;
+
+        // 오른쪽 자식이 있는 경우, 작은 쪽의 자식 선택
+        if(rightChild < length) {
+
+			// 길이가 짧은 쪽을 우선적으로 선택
+            if(input[leftChild].length() < input[rightChild].length())
+                smaller = leftChild;
+            else if(input[leftChild].length() > input[rightChild].length())
+                smaller = rightChild;
+			// 길이가 동일하다면 compareTo 함수를 이용하여 작은 쪽을 선택 (사전순 ex] A < B -> A 선택)
+            else
+                smaller = (input[leftChild].compareTo(input[rightChild]) < 0 ? leftChild : rightChild);
+        }
+        // 왼쪽 자식만 있는 경우, 왼쪽 자식 선택
+        else if(leftChild < length)
+            smaller = leftChild;
+            // 자식이 없으면 Pass
+        else
+            return;
+
+		// 부모와 자식의 문자열 길이 비교 후 자식의 길이가 더 작다면 부모와 변경 후 자식을 기준으로 다시 힙으로 만들어주기.
+        if(input[smaller].length() < input[parNode].length()) {
+            swap(smaller, parNode, input);
+            heapify(input, smaller, length);
+        }
+        // 부모 자식의 문자열 길이 동일하고 자식이 부모보다 사전순서가 앞서는 경우 자리 변경 후 바뀐 부모를 루트로하는 서브트리를 Heap으로 다시 변경.
+        else if(input[smaller].length() == input[parNode].length() && input[smaller].compareTo(input[parNode]) < 0) {
+            swap(smaller, parNode, input);
+            heapify(input, smaller, length);
+        }
+    }
+}
+
+
+
