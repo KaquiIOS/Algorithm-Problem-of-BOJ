@@ -1,0 +1,512 @@
+K 번쨰 수
+
+* 일반 선형 탐색과 일정 최악의 경우라도 일정 비율로 나눠지는 선형 탐색의 방법을 사용하여 풀이
+* 왜 일반 선형 탐색이 더 빠르지..
+* 오버헤드라고 해봤자 O(n)인데 왜지 왜일까 뭐때문일까 내 코딩방식이 문제로구나
+
+
+K번째 수 성공 
+시간 제한	메모리 제한	제출	정답	맞은 사람	정답 비율
+
+문제
+수 N개 A1, A2, ..., AN이 주어진다. A를 오름차순 정렬했을 때, 앞에서부터 K번째 있는 수를 구하는 프로그램을 작성하시오.
+
+입력
+첫째 줄에 N(1 ≤ N ≤ 5,000,000)과 K (1 ≤ K ≤ N)이 주어진다.
+
+둘째에는 A1, A2, ..., AN이 주어진다. (-109 ≤ Ai ≤ 109)
+
+출력
+A를 정렬했을 때, 앞에서부터 K번째 있는 수를 출력한다.
+
+예제 입력 1  복사
+5 2
+4 1 2 3 5
+예제 출력 1  복사
+2
+
+
+< 선형 탐색 >
+
+import javafx.util.Pair;
+import java.io.*;
+import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
+public class Main {
+
+    final static int MAX_SIZE = 11;
+
+    public static void main(String args[]) throws Exception{
+
+        FastScanner fs = new FastScanner();
+        Random rd = new Random();
+
+        int testCase = fs.nextInt();
+
+        int[] input = new int[testCase];
+
+        int idx = fs.nextInt();
+
+        for(int i = 0; i < testCase; ++i)
+            input[i] = fs.nextInt();
+
+        int val = Sort.sortedIndexOf(input, idx - 1);
+
+        System.out.println(val);
+    }
+}
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+    }
+}
+
+
+class Sort {
+
+    private static void swap(int idx1, int idx2, int[] input) {
+        // 같은 인덱스면 return
+        if(idx1 == idx2) return;
+        // Swap
+        int tmp = input[idx1];
+        input[idx1] = input[idx2];
+        input[idx2] = tmp;
+    }
+
+    private static void reverse(int[] input) {
+
+        int left = 0, right = input.length - 1;
+
+        while(left < right)
+            swap(left++, right--, input);
+    }
+
+
+
+    /*
+     * Method      : mergeSort
+     * Parameter   : input : int[], asc : boolean
+     * Description : 외부에서 접근하기위해 만들어 놓은 병합정렬 메소드. asc = true(오름차순) / false(내림차순)
+     */
+    public final static void mergeSort(int input[], boolean asc) {
+
+        int left = 0, right = input.length - 1;
+
+        mergeSort(input, left, right);
+
+        // 오름차순으로 정렬되기때문에 asc == False 인 경우만 역순으로 배치한다.
+        if(!asc)
+            reverse(input);
+        //ArrayUtils.reverse(input);
+    }
+
+    /*
+     * Method      : mergeSort
+     * Parameter   : input : int[], left : int, right : int, asc : boolean
+     * Description : 입력을 반으로 나눌 수 없을 때 까지 나눈 후 merge 함수를 호출하여 부분 정렬. asc 로 정렬 순서 선택
+     * TimeSpace   :
+     */
+    private final static void mergeSort(int[] input, int left, int right) {
+
+        // 원소가 적어도 두개 이상인 경우 Divide
+        if(left < right) {
+
+            // 중심 계산
+            int pivot = (left + right)/2;
+
+            // 왼쪽 나누기
+            mergeSort(input, left, pivot);
+
+            // 오른쪽 나누기
+            mergeSort(input, pivot + 1, right);
+
+            // 왼쪽, 오른쪽 다시 합치기. Conquer
+            merge(input, left, pivot, right);
+        }
+    }
+
+    /*
+     * Method      : merge
+     * Parameter   : input : int[], left : int, pivot : int, right : int, asc : boolean
+     * Description : 두개로 나뉜 입력을 크기 순서대로 재배열한다. asc 로 정렬 순서 선택
+     */
+    private final static void merge(int[] input, int left, int pivot, int right) {
+
+        int l = left, p = pivot + 1, r = right, count = 0;
+
+        // 필요한 크기만큼의 배열 생성
+        int[] tmp = new int[right - left + 1];
+
+        // 왼쪽, 오른쪽 값 비교하면서 하나씩 넣기
+        while(l <= pivot && p <= right)
+            tmp[count++] = (input[l] < input[p] ? input[l++] : input[p++]);
+
+        // 나머지 차례대로 넣기
+        for(; l <= pivot; ++l, ++count)
+            tmp[count] = input[l];
+        for(; p <= right; ++p, ++count)
+            tmp[count] = input[p];
+
+        // 복사
+        for(int i = left, k = 0; i <= right; ++i, ++k)
+            input[i] = tmp[k];
+    }
+
+    /*
+     * Method      : partition
+     * Parameter   : input : int[], asc : boolean
+     * Description : 외부에서 접근하기 위해 만들어 놓은 quickSort 함수. asc = true/false (오름차순/내림차순)
+     */
+    public final static int partition(int[] input, int left, int pivot) {
+        // i : pivot 이 들어갈 위치 계산
+        int i = left - 1, j = left;
+
+        for(; j < pivot; ++ j) {
+
+            if(input[j] < input[pivot])
+                swap(++i,j,input);
+        }
+        // pivot 을 적절한 위치로 보내기.
+        swap(++i, pivot, input);
+        // input 을 나누는 기준점 반환
+        return i;
+    }
+
+    /*
+     * Method      : sortedIndexOf
+     * Parameter   : input : int[], idx : int
+     * Description : idx번째로 작은 값 반환
+     */
+    public final static int sortedIndexOf(int[] input, int idx) throws Exception{
+
+        if(input.length <= idx)
+            throw new IndexOutOfBoundsException();
+
+        int val = select(input, 0, input.length - 1, idx);
+
+        return val;
+    }
+
+    private final static int select(int[] input, int left, int right, int idx) {
+
+        // 원소가 하나가 남았으면 해당 원소 리턴
+        if(left == right) return input[left];
+
+        // 찾고자하는 인덱스가 Pivot 을 기준으로 어디 위치해있는지 확인
+        int pivot = partition(input, left, right);
+
+        // 왼쪽에 위치한 경우
+        if(idx < pivot) return select(input, left, pivot - 1, idx);
+            // Pivot은 정렬된 위치를 가진다 => Pivot과 같으면 바로 pivot 자리 리턴
+        else if(pivot == idx) return input[pivot];
+            // 오른쪽에 위치한 경우
+        else return select(input, pivot + 1, right, idx);
+
+        /*
+        if(left <= right) {
+
+            int pivot = partition(input,left, right);
+
+            if(idx < pivot) return select(input, left, pivot - 1, idx);
+            else if(idx == pivot) return input[pivot];
+            else return select(input, pivot + 1, right, idx);
+        }*/
+    }
+}
+
+
+< 최악의 경우를 대비한 선형 탐색 >
+ * 최악의 경우를 방지하기위해 median of median을 pivot으로 이용하는 방식
+ * 최악의 경우라도 7 : 3의 비율로 partition 이 된다.
+ * 비율은 그룹의 수에 따라 달라진다.
+
+import javafx.util.Pair;
+import java.io.*;
+import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
+public class Main {
+
+    final static int MAX_SIZE = 11;
+
+    public static void main(String args[]) throws Exception{
+
+        FastScanner fs = new FastScanner();
+        Random rd = new Random();
+
+        int testCase = fs.nextInt();
+
+        int[] input = new int[testCase];
+
+        int idx = fs.nextInt();
+
+        for(int i = 0; i < testCase; ++i)
+            input[i] = fs.nextInt();
+
+        int val = Sort.linearSortedIndexOf(input, idx - 1, 5);
+
+        System.out.println(val);
+    }
+
+
+}
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+    }
+}
+
+
+class Sort {
+
+    private static void swap(int idx1, int idx2, int[] input) {
+        // 같은 인덱스면 return
+        if(idx1 == idx2) return;
+        // Swap
+        int tmp = input[idx1];
+        input[idx1] = input[idx2];
+        input[idx2] = tmp;
+    }
+
+    private static void reverse(int[] input) {
+
+        int left = 0, right = input.length - 1;
+
+        while(left < right)
+            swap(left++, right--, input);
+    }
+
+    /*
+     * Method      : mergeSort
+     * Parameter   : input : int[], asc : boolean
+     * Description : 외부에서 접근하기위해 만들어 놓은 병합정렬 메소드. asc = true(오름차순) / false(내림차순)
+     */
+    public final static void mergeSort(int input[], boolean asc) {
+
+        int left = 0, right = input.length - 1;
+
+        mergeSort(input, left, right);
+
+        // 오름차순으로 정렬되기때문에 asc == False 인 경우만 역순으로 배치한다.
+        if(!asc)
+            reverse(input);
+        //ArrayUtils.reverse(input);
+    }
+
+    /*
+     * Method      : mergeSort
+     * Parameter   : input : int[], left : int, right : int, asc : boolean
+     * Description : 입력을 반으로 나눌 수 없을 때 까지 나눈 후 merge 함수를 호출하여 부분 정렬. asc 로 정렬 순서 선택
+     * TimeSpace   :
+     */
+    private final static void mergeSort(int[] input, int left, int right) {
+
+        // 원소가 적어도 두개 이상인 경우 Divide
+        if(left < right) {
+
+            // 중심 계산
+            int pivot = (left + right)/2;
+
+            // 왼쪽 나누기
+            mergeSort(input, left, pivot);
+
+            // 오른쪽 나누기
+            mergeSort(input, pivot + 1, right);
+
+            // 왼쪽, 오른쪽 다시 합치기. Conquer
+            merge(input, left, pivot, right);
+        }
+    }
+
+    /*
+     * Method      : merge
+     * Parameter   : input : int[], left : int, pivot : int, right : int, asc : boolean
+     * Description : 두개로 나뉜 입력을 크기 순서대로 재배열한다. asc 로 정렬 순서 선택
+     */
+    private final static void merge(int[] input, int left, int pivot, int right) {
+
+        int l = left, p = pivot + 1, r = right, count = 0;
+
+        // 필요한 크기만큼의 배열 생성
+        int[] tmp = new int[right - left + 1];
+
+        // 왼쪽, 오른쪽 값 비교하면서 하나씩 넣기
+        while(l <= pivot && p <= right)
+            tmp[count++] = (input[l] < input[p] ? input[l++] : input[p++]);
+
+        // 나머지 차례대로 넣기
+        for(; l <= pivot; ++l, ++count)
+            tmp[count] = input[l];
+        for(; p <= right; ++p, ++count)
+            tmp[count] = input[p];
+
+        // 복사
+        for(int i = left, k = 0; i <= right; ++i, ++k)
+            input[i] = tmp[k];
+    }
+
+    /*
+     * Method      : partition
+     * Parameter   : input : int[], asc : boolean
+     * Description : 외부에서 접근하기 위해 만들어 놓은 quickSort 함수. asc = true/false (오름차순/내림차순)
+     */
+    public final static int partition(int[] input, int left, int pivot) {
+        // i : pivot 이 들어갈 위치 계산
+        int i = left - 1, j = left;
+
+        for(; j < pivot; ++ j) {
+
+            if(input[j] < input[pivot])
+                swap(++i,j,input);
+        }
+        // pivot 을 적절한 위치로 보내기.
+        swap(++i, pivot, input);
+        // input 을 나누는 기준점 반환
+        return i;
+    }
+
+    /*
+     * Method      : sortedIndexOf
+     * Parameter   : input : int[], idx : int
+     * Description : idx번째로 작은 값 반환
+     */
+    public final static int sortedIndexOf(int[] input, int idx) throws Exception{
+
+        if(input.length <= idx)
+            throw new IndexOutOfBoundsException();
+
+        int val = select(input, 0, input.length - 1, idx);
+
+        return val;
+    }
+
+    private final static int select(int[] input, int left, int right, int idx) {
+
+        // 원소가 하나가 남았으면 해당 원소 리턴
+        if(left == right) return input[left];
+
+        // 찾고자하는 인덱스가 Pivot 을 기준으로 어디 위치해있는지 확인
+        int pivot = partition(input, left, right);
+
+        // 왼쪽에 위치한 경우
+        if(idx < pivot) return select(input, left, pivot - 1, idx);
+            // Pivot은 정렬된 위치를 가진다 => Pivot과 같으면 바로 pivot 자리 리턴
+        else if(pivot == idx) return input[pivot];
+            // 오른쪽에 위치한 경우
+        else return select(input, pivot + 1, right, idx);
+
+        /*
+        if(left <= right) {
+
+            int pivot = partition(input,left, right);
+
+            if(idx < pivot) return select(input, left, pivot - 1, idx);
+            else if(idx == pivot) return input[pivot];
+            else return select(input, pivot + 1, right, idx);
+        }*/
+    }
+
+
+    /*
+     * Method      : linearSelect
+     * Parameter   : input : int[], left : int, right : int, idx : int, numOfMembers : int
+     * Description : input을 numOfMembers 의 수만큼 묶은 다음 각 그룹을 정렬. 정렬 후 각 그룹의 중앙값들을 따로 추출하여 중앙값의 중앙값을 pivot 으로 사용.
+     *               이렇게하면 최악의 경우(pivot이 극단적인 위치와 같이 맨앞, 맨뒤 등..)에도 일정 비율로 input이 나눠짐. 단, 모든 값이 똑같은 input의 경우 예외.
+     */
+    private final static int linearSelect(int[] input, int left, int right, int idx, int numOfMembers) {
+
+
+        // 만약 left == right 면 값 찾음
+        if(left == right) return input[left];
+
+        // numOfMembers 만큼 나눈 후 각 그룹 정렬
+        int range = left;
+        ArrayList<Pair<Integer, Integer>> medianList = new ArrayList<Pair<Integer, Integer>>();
+        for(; range <= right; range += (numOfMembers + 1)) {
+            if(right < range + numOfMembers) {
+                mergeSort(input, range, right);
+                medianList.add(new Pair<>((range + right)/2,input[(range + right)/2]));
+            }
+            else {
+                mergeSort(input, range, range + numOfMembers);
+                medianList.add(new Pair<>(range + numOfMembers/2,input[range + numOfMembers/2]));
+            }
+        }
+
+        int medianLength = medianList.size();
+        // 동시에 각 median 값 저장
+        Collections.sort(medianList, new Comparator<Pair<Integer, Integer>>() {
+            @Override
+            public int compare(Pair<Integer, Integer> o1, Pair<Integer, Integer> o2) {
+                return o1.getValue() - o2.getValue();
+            }
+        });
+
+        // median of median
+        int median = medianList.get(medianLength/2).getKey();
+
+        // median 값의 median 값 확인 후 pivot으로 선택
+        swap(median, right, input);
+
+        // 맨 오른쪽과 교체 후 partition 진행
+        int pivot = partition(input, left, right);
+
+        // 찾는 idx가 pivot 왼쪽이면 left - pivot - 1
+        if(idx < pivot) return linearSelect(input,left, pivot - 1, idx, numOfMembers);
+            // idx를 찾았다면 반환
+        else if(idx == pivot) return input[pivot];
+            // 찾는 idx가 pivot 오른쪽이면 pivot + 1 - right
+        else return linearSelect(input, pivot + 1, right, idx, numOfMembers);
+    }
+
+
+    public final static int linearSortedIndexOf(int[] input, int idx, int numOfMembers) throws Exception {
+
+        if(input.length <= idx)
+            throw new IndexOutOfBoundsException();
+
+        int val = linearSelect(input, 0, input.length - 1, idx, numOfMembers - 1);
+
+        return val;
+    }
+}
+
+
+
