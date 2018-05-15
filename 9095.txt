@@ -1,0 +1,105 @@
+1, 2, 3 더하기 (1번)
+
+문제
+정수 4를 1, 2, 3의 조합으로 나타내는 방법은 총 7가지가 있다.
+
+1+1+1+1
+1+1+2
+1+2+1
+2+1+1
+2+2
+1+3
+3+1
+정수 n이 주어졌을 때, n을 1,2,3의 합으로 나타내는 방법의 수를 구하는 프로그램을 작성하시오.
+
+입력
+첫째 줄에 테스트 케이스의 개수 T가 주어진다. 각 테스트 케이스는 한 줄로 이루어져 있고, 정수 n이 주어진다. n은 양수이며 11보다 작다.
+
+출력
+각 테스트 케이스마다, n을 1,2,3의 합으로 나타내는 방법의 수를 출력한다.
+
+예제 입력 1  복사
+3
+4
+7
+10
+예제 출력 1  복사
+7
+44
+274
+
+
+
+PS:
+	* 메모이제이션을 통해 각 n 을 만들 수 있는 방법의 수를 기록
+	* 중요하게 생각되는 부분은 0 을 만드는 방법을 1로 본다는 것(아무것도 사용하지 않음)
+	* 재귀를 통해 각 n을 1,2,3의 조합으로 만들 수 있는 방법의 수 계산
+	* n보다 1,2,3 작은 수의 조합횟수를 재귀적으로 계산
+	
+점화식
+	dp[n] = rec(n-1) + rec(n-2) + rec(n-3)
+	
+	
+
+import java.io.*;
+import java.util.*;
+
+
+public class Main {
+
+    final static int MAX_SIZE = 11;
+    final static int NOT_VISIT = -1;
+    static int[] dp;
+
+    public static void main(String args[]) throws Exception{
+
+        FastScanner fs = new FastScanner();
+
+        int testCase = fs.nextInt();
+
+        dp = new int[MAX_SIZE];
+        Arrays.fill(dp, NOT_VISIT);
+
+        // 0 혹은 1을 만드는 방법은 하나
+        dp[0] = dp[1] = 1;
+
+        for(; testCase > 0; testCase--) {
+            int input = fs.nextInt();
+            System.out.println(rec(input));
+        }
+    }
+
+    public static int rec(int n) {
+
+        if(n < 0) return 0;
+
+        if(dp[n] != NOT_VISIT) return dp[n];
+
+        dp[n] = 0;
+
+        dp[n] = rec(n-1) + rec(n-2) + rec(n-3);
+
+        return dp[n];
+    }
+}
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if(st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+    }
+}
