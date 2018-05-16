@@ -1,0 +1,112 @@
+연속합 
+
+문제
+n개의 정수로 이루어진 임의의 수열이 주어진다. 우리는 이 중 연속된 몇 개의 숫자를 선택해서 구할 수 있는 합 중 가장 큰 합을 구하려고 한다. 단, 숫자는 한 개 이상 선택해야 한다.
+
+예를 들어서 10, -4, 3, 1, 5, 6, -35, 12, 21, -1 이라는 수열이 주어졌다고 하자. 여기서 정답은 12+21인 33이 정답이 된다.
+
+입력
+첫째 줄에 정수 n(1≤n≤100,000)이 주어지고 둘째 줄에는 n개의 정수로 이루어진 수열이 주어진다. 수는 -1,000보다 크거나 같고, 1,000보다 작거나 같은 정수이다.
+
+출력
+첫째 줄에 답을 출력한다.
+
+예제 입력 1  복사
+10
+10 -4 3 1 5 6 -35 12 21 -1
+예제 출력 1  복사
+33
+
+
+PS:
+	* 메모이제이션을 통해 N번 째에서 가질 수 있는 연속합의 최댓값을 저장
+	* 재귀를 통해 연속합의 최댓값을 계산.
+	* 맨 마지막 요소의 최대합은 N번 Score 값이다.
+	* 경우의 수를 생각해보면
+		1. 앞의 값을 사용한다.
+		2. 앞의 값을 사용하지 않는다.
+	  와 같다.
+	  
+	* 앞의 값을 사용하는 것은 DP[N] < DP[N] + Score[N+1] 인 경우이다. => DP[N]을 유지한다.
+	* 앞의 값을 사용하지 않는 것은 DP[N] > DP[N] + Score[N+1] 인 경우이다.
+	
+   ** 이번에는 score가 음수를 포함하기에 NOT_VISIT을 -1로 설정하면 score가 -1이 되는 경우에는 제대로 프로그램이 돌지않는다.
+    * 그래서 NOT_VISIT을 프로그램에서 나오지 않을 수인 -100000000 으로 설정하여 오류를 방지해야한다. (다른 큰 숫자 사용가능)
+	
+	
+점화식:
+	DP[N] = max(DP[N], DP[N+1] + Score[N])
+	
+	
+
+import java.io.*;
+import java.util.*;
+
+
+public class Main {
+
+    final static int NOT_VISIT = -1000000000;
+    static int[] dp, score;
+    static int N;
+
+    public static void main(String args[]) throws Exception {
+
+        FastScanner fs = new FastScanner();
+
+        N = fs.nextInt();
+
+        dp = new int[N];
+        score = new int[N];
+
+        for (int i = 0; i < N; ++i)
+            score[i] = fs.nextInt();
+
+        Arrays.fill(dp, NOT_VISIT);
+
+        dp[N-1] = score[N-1];
+
+        rec(0);
+
+        int maxIdx = 0;
+
+        for(int i = 1; i < N; ++i)
+            maxIdx = (dp[i] > dp[maxIdx]) ? i : maxIdx;
+
+        System.out.println(dp[maxIdx]);
+    }
+
+    public static int rec(int n) {
+
+        if(dp[n] != NOT_VISIT) return dp[n];
+
+        dp[n] = score[n];
+
+        dp[n] = Math.max(dp[n],dp[n] + rec(n + 1));
+
+        return dp[n];
+    }
+
+}
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+    }
+}
+
+	

@@ -1,0 +1,133 @@
+붕어빵 판매하기 
+
+문제
+강남역에서 붕어빵 장사를 하고 있는 해빈이는 지금 붕어빵이 N개 남았다.
+
+해빈이는 적절히 붕어빵 세트 메뉴를 구성해서 붕어빵을 팔아서 얻을 수 있는 수익을 최대로 만드려고 한다. 붕어빵 세트 메뉴는 붕어빵을 묶어서 파는 것을 의미하고, 세트 메뉴의 가격은 이미 정해져 있다.
+
+붕어빵 i개로 이루어진 세트 메뉴의 가격은 Pi 원이다.
+
+붕어빵이 4개 남아 있고, 1개 팔 때의 가격이 1, 2개는 5, 3개는 6, 4개는 7인 경우에 해빈이가 얻을 수 있는 최대 수익은 10원이다. 2개, 2개로 붕어빵을 팔면 되기 때문이다.
+
+1개 팔 때의 가격이 5, 2개는 2, 3개는 8, 4개는 10 인 경우에는 20이 된다. 1개, 1개, 1개, 1개로 붕어빵을 팔면 되기 때문이다.
+
+마지막으로, 1개 팔 때의 가격이 3, 2개는 5, 3개는 15, 4개는 16인 경우에는 정답은 18이다. 붕어빵을 3개, 1개로 팔면 되기 때문이다.
+
+세트 메뉴의 가격이 주어졌을 때, 해빈이가 얻을 수 있는 최대 수익을 구하는 프로그램을 작성하시오.
+
+입력
+첫째 줄에 해빈이가 가지고 있는 붕어빵의 개수 N이 주어진다. (1 ≤ N ≤ 1,000)
+
+둘째 줄에는 Pi가 P1부터 PN까지 순서대로 주어진다. (1 ≤ Pi ≤ 10,000)
+
+출력
+해빈이가 얻을 수 있는 최대 수익을 출력한다.
+
+예제 입력 1  복사
+4
+1 5 6 7
+예제 출력 1  복사
+10
+예제 입력 2  복사
+5
+10 9 8 7 6
+예제 출력 2  복사
+50
+예제 입력 3  복사
+10
+1 1 2 3 5 8 13 21 34 55
+예제 출력 3  복사
+55
+예제 입력 4  복사
+10
+5 10 11 12 13 30 35 40 45 47
+예제 출력 4  복사
+50
+예제 입력 5  복사
+4
+5 2 8 10
+예제 출력 5  복사
+20
+예제 입력 6  복사
+4
+3 5 15 16
+예제 출력 6  복사
+18
+
+
+PS:
+	* 부분 문제를 잘 파악해야하는 문제다.
+	* 메모이제이션을 통해 붕어빵이 N개 남았을 때 벌 수 있는 최대 이익을 저장.
+	* 재귀를 통해 붕어빵이 N개 남았을 때 벌 수 있는 최대 이익을 계산.
+	* 3개가 남았다면 3개 가격 + 0개 팔기 부분 문제, 2개 가격 + 1개 팔기 부분 문제 등.. 과 같이 파는 방법 탐색.
+	
+점화식:
+	DP[N] = max(DP[N], Price[N] + rec(N-i)) ( 1 <= i < N )
+	
+	
+
+import java.io.*;
+import java.util.*;
+
+
+public class Main {
+
+    final static int NOT_VISIT = -1;
+    static int[] dp, price;
+    static int N;
+
+    public static void main(String args[]) throws Exception {
+
+        FastScanner fs = new FastScanner();
+
+        N = fs.nextInt();
+
+        dp = new int[N + 1];
+        price = new int[N + 1];
+
+        for(int i = 1; i <= N; ++i)
+            price[i] = fs.nextInt();
+
+        Arrays.fill(dp, NOT_VISIT);
+
+        int ans = rec(N);
+
+        System.out.println(ans);
+    }
+
+    public static int rec(int n) {
+
+        if(n < 1) return 0;
+        if(dp[n] != NOT_VISIT) return dp[n];
+
+        dp[n] = price[n];
+
+        for(int i = 1; i < n; ++i)
+            dp[n] = Math.max(dp[n], rec(n-i) + price[i]);
+
+        return dp[n];
+    }
+}
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+    }
+}
+
+	

@@ -1,0 +1,207 @@
+포도주 시식 
+
+문제
+효주는 포도주 시식회에 갔다. 그 곳에 갔더니, 테이블 위에 다양한 포도주가 들어있는 포도주 잔이 일렬로 놓여 있었다. 효주는 포도주 시식을 하려고 하는데, 여기에는 다음과 같은 두 가지 규칙이 있다.
+
+포도주 잔을 선택하면 그 잔에 들어있는 포도주는 모두 마셔야 하고, 마신 후에는 원래 위치에 다시 놓아야 한다.
+연속으로 놓여 있는 3잔을 모두 마실 수는 없다.
+효주는 될 수 있는 대로 많은 양의 포도주를 맛보기 위해서 어떤 포도주 잔을 선택해야 할지 고민하고 있다. 
+1부터 n까지의 번호가 붙어 있는 n개의 포도주 잔이 순서대로 테이블 위에 놓여 있고, 각 포도주 잔에 들어있는 포도주의 양이 주어졌을 때, 효주를 도와 가장 많은 양의 포도주를 마실 수 있도록 하는 프로그램을 작성하시오. 
+
+예를 들어 6개의 포도주 잔이 있고, 각각의 잔에 순서대로 6, 10, 13, 9, 8, 1 만큼의 포도주가 들어 있을 때, 첫 번째, 두 번째, 네 번째, 다섯 번째 포도주 잔을 선택하면 총 포도주 양이 33으로 최대로 마실 수 있다.
+
+입력
+첫째 줄에 포도주 잔의 개수 n이 주어진다. (1≤n≤10,000) 둘째 줄부터 n+1번째 줄까지 포도주 잔에 들어있는 포도주의 양이 순서대로 주어진다. 포도주의 양은 1,000 이하의 음이 아닌 정수이다.
+
+출력
+첫째 줄에 최대로 마실 수 있는 포도주의 양을 출력한다.
+
+예제 입력 1  복사
+6
+6
+10
+13
+9
+8
+1
+예제 출력 1  복사
+33
+
+
+PS:
+	* 메모이제이션을 통해 각 N번 와인을 마실 때 얻을 수 있는 최대 드링킹 값을 저장.(소최몇)
+	* 재귀를 통해 각 N번 와인을 마실 때 최대 드링킹 값을 계산.
+	* 연속으로 3개의 와인을 마실 수 없다. continuity 변수를 사용하여 연속으로 3개의 와인을 마실 수 없게 예외처리.
+	* 포도잔 10000개이고 모든 포도주의 양이 1000이라고 가정했을 때 최댓값은 600만정도의 값. Int로 커버할 수 있다.
+	* 계단 오르기 문제와 다르게 꼭 맨 마지막 와인을 마시지 않아도 되므로 마지막 와인에 도달하게 하기위한 예외처리는 필요없다.
+	* N이 범위를 벗어나지 않게 예외처리 필요
+	* DP[N][CONTINUITY] = N번 와인을 마실 때 얻을 수 있는 최대 드링킹 값.
+	* 항상 n + 1, n + 2만 방문할 필요없다. 그냥 갈 수 있는 위치 중 가장 큰 값을 사용하면 된다.(이 부분때문에 많이 3번 틀림)
+	
+	
+	
+  *** 이 문제를 풀고나서 굉장히 잘못된 점화식과 잘못된 풀이라는 것을 알게되었다.
+    * 제대로 경우의 수를 나누지 못했다.
+	
+	* 경우의 수를 제대로 나눈다면
+		1. n번*(현재) 와인을 마시지 않는다. => n-1 번까지 마실 수 있는 최댓값을 이용한다.
+		2. n-1번 와인은 마시지 않고 n번 와인은 마신다 => n-2번 까지 마실 수 있는 최댓값 + 현재 와인값
+		3. n-1, n번 와인을 마신다. => 연속된 3개의 와인을 마시지 못하기때문에 n-3번 까지 마실 수 있는 최댓값 + n-1번 와인 + n번 와인
+	  과 같은 경우로 나뉘어진다.
+	
+	* 그래서 제대로 된 점화식은 아래와 같다.
+		DP[N] = max(DP[N-1], max(wine[n] + DP[N-2], wine[n] + wine[n-1] + DP[N-3]))
+	  
+	* 변경된 소스코드는 맨 아래에 있다.  
+	
+잘못된 점화식:
+	DP[N][1] = max(DP[N][continuity], max(rec(N+1, continuity), rec(N+2, 1)) if(continuity == 1)
+			 = max(DP[N][continuity], rec(N+2, 1)) if(continuity == 2)
+			 
+
+			 
+< 잘못된 점화식의 소스코드 >			
+
+import java.io.*;
+import java.util.*;
+
+
+public class Main {
+
+    final static int NOT_VISIT = -1;
+    static int[][] dp;
+    static int[] wine;
+    static int N;
+
+    public static void main(String args[]) throws Exception {
+
+        FastScanner fs = new FastScanner();
+
+        N = fs.nextInt();
+
+        dp = new int[N][2];
+        wine = new int[N];
+
+        for(int i = 0; i < N; ++i) {
+            wine[i] = fs.nextInt();
+            Arrays.fill(dp[i], NOT_VISIT);
+        }
+
+        int ans = Math.max(rec(1, 0), rec(0, 0));
+
+        System.out.println(ans);
+    }
+
+    public static int rec(int n, int continuity) {
+
+        if(N <= n) return 0;
+        if(dp[n][continuity] != NOT_VISIT) return dp[n][continuity];
+
+        dp[n][continuity] = 0;
+
+        if(continuity == 1) {
+            for(int i = n; i < N; ++i)
+                dp[n][continuity] = Math.max(dp[n][continuity], rec(i+2, 0)+ wine[n]);
+        } else {
+            dp[n][continuity] = Math.max(dp[n][continuity], rec(n+1, 1)+ wine[n]);
+            for(int i = n; i < N; ++i)
+                dp[n][continuity] = Math.max(dp[n][continuity], rec(i+2, 0) + wine[n]);
+        }
+
+        return dp[n][continuity];
+    }
+
+}
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+    }
+}
+
+
+< 제대로 된 점화식 코드 >
+
+package SortingAlgorithm;
+
+import java.io.*;
+import java.util.*;
+
+
+public class Main {
+
+    final static int NOT_VISIT = -1;
+    static int[] dp, wine;
+    static int N;
+
+    public static void main(String args[]) throws Exception {
+
+        FastScanner fs = new FastScanner();
+
+        N = fs.nextInt();
+
+        dp = new int[N];
+        wine = new int[N];
+
+        for (int i = 0; i < N; ++i)
+            wine[i] = fs.nextInt();
+
+        Arrays.fill(dp, NOT_VISIT);
+
+        int ans = rec(N - 1);
+
+        System.out.println(ans);
+    }
+
+    public static int rec(int n) {
+
+        if (n < 0) return 0;
+        if (n == 0) return wine[0];
+        if (dp[n] != NOT_VISIT) return dp[n];
+
+        dp[n] = wine[n];
+
+        dp[n] = Math.max(rec(n - 1), Math.max(wine[n] + rec(n - 2), wine[n] + wine[n - 1] + rec(n - 3)));
+
+        return dp[n];
+    }
+
+}
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+    }
+}
+
+			 

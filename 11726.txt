@@ -1,0 +1,107 @@
+2×n 타일링 
+
+문제
+2×n 크기의 직사각형을 1×2, 2×1 타일로 채우는 방법의 수를 구하는 프로그램을 작성하시오.
+
+아래 그림은 2×5 크기의 직사각형을 채운 한 가지 방법의 예이다.
+
+
+입력
+첫째 줄에 n이 주어진다. (1 ≤ n ≤ 1,000)
+
+출력
+첫째 줄에 2×n 크기의 직사각형을 채우는 방법의 수를 10,007로 나눈 나머지를 출력한다.
+
+예제 입력 1  복사
+2
+예제 출력 1  복사
+2
+예제 입력 2  복사
+9
+예제 출력 2  복사
+55
+
+
+PS:
+	* 메모이제이션을 통해 각 N값일 때 만들 수 있는 2*N 직사각형의 수 저장
+	* 손으로 N = 1, 2, 3, 4인 경우를 그려보면
+		1. 2*(N-1) 직사각형들의 맨 앞에 1*2 직사각형을 붙이는 경우.
+		2. 2*(N-2) 직사각형들의 맨 앞에 2*1 직사각형 두개를 위아래로 붙인 2*2직사각형을 붙이는 경우.
+	  의 두 경우로 나뉜다.
+	* N = 0 일 때 만들 수 있는 2*0 직사각형의 개수를 몇개로 하는게 코딩하는 부분에서 더 편할지 생각해봤다. 결론은 N = 0일때도 1*2, 2*1 도형을 안쓰는 하나의 방법이 있다고 간주한다.
+	* DP[N] = 2 * N 일 때 만들 수 있는 직사각형들의 수.
+  *** Mod 연산의 변환 방식 찾아봤음
+		1. (A+B)%MOD = (A%MOD + B%MOD) % MOD
+		2. (A-B)%MOD = (A%MOD - B%MOD) % MOD
+		3. (A*B)%MOD = (A%MOD * B%MOD) % MOD
+	  **4. (A/B)%MOD = (A%MOD * (1/B)%MOD) % MOD
+	
+점화식:
+	DP[N] = DP[N-1] + DP[N-2] (DP[0] = 1, DP[1] = 1)
+	
+
+import java.io.*;
+import java.util.*;
+
+
+public class Main {
+
+    final static int NOT_VISIT = -1;
+    final static int MOD = 10007;
+    static int[] dp;
+    static int N;
+
+    public static void main(String args[]) throws Exception {
+
+        FastScanner fs = new FastScanner();
+
+        N = fs.nextInt();
+
+        dp = new int[N + 1];
+
+        Arrays.fill(dp, NOT_VISIT);
+
+        dp[0] = dp[1] = 1;
+
+        OutputStream out = new BufferedOutputStream(System.out);
+
+        int ans = rec(N);
+
+        out.write((ans + "\n").getBytes());
+
+        out.flush();
+    }
+
+    public static int rec(int n) {
+
+        if(dp[n] != NOT_VISIT) return dp[n];
+
+        dp[n] = 0;
+
+        dp[n] = (rec(n-1)%MOD + rec(n-2)%MOD)%MOD;
+
+        return dp[n];
+    }
+
+}
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+    }
+}

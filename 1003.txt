@@ -1,0 +1,225 @@
+피보나치 함수 
+
+문제
+다음 소스는 N번째 피보나치 수를 구하는 C++ 함수이다.
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+
+int fibonacci(int n) {
+    if (n == 0) {
+        printf("0");
+        return 0;
+    } else if (n == 1) {
+        printf("1");
+        return 1;
+    } else {
+        return fibonacci(n‐1) + fibonacci(n‐2);
+    }
+}
+
+fibonacci(3)을 호출하면 다음과 같은 일이 일어난다.
+
+º fibonacci(3)은 fibonacci(2)와 fibonacci(1) (첫 번째 호출)을 호출한다.
+º fibonacci(2)는 fibonacci(1) (두 번째 호출)과 fibonacci(0)을 호출한다.
+º 두 번째 호출한 fibonacci(1)은 1을 출력하고 1을 리턴한다.
+º fibonacci(0)은 0을 출력하고, 0을 리턴한다.
+º fibonacci(2)는 fibonacci(1)과 fibonacci(0)의 결과를 얻고, 1을 리턴한다.
+º 첫 번째 호출한 fibonacci(1)은 1을 출력하고, 1을 리턴한다.
+º fibonacci(3)은 fibonacci(2)와 fibonacci(1)의 결과를 얻고, 2를 리턴한다.
+º 1은 2번 출력되고, 0은 1번 출력된다. N이 주어졌을 때, fibonacci(N)을 호출했을 때, 0과 1이 각각 몇 번 출력되는지 구하는 프로그램을 작성하시오.
+
+입력
+첫째 줄에 테스트 케이스의 개수 T가 주어진다. 각 테스트 케이스는 다음과 같이 구성되어있다.
+
+첫째 줄에 N이 주어진다. N은 40보다 작거나 같은 자연수 또는 0이다.
+
+출력
+각 테스트 케이스마다 0이 출력되는 횟수와 1이 출력되는 횟수를 공백으로 구분해서 출력한다.
+
+예제 입력 1  복사
+3
+0
+1
+3
+예제 출력 1  복사
+1 0
+0 1
+1 2
+
+
+
+PS:
+	* DP를 Pair Type 으로 생성
+	* 피보나치 함수를 작성할 때 예외 케이스(이미 방문한 자리)를 이용하여 fibonacci(0), fibonacci(1) 의 호출 횟수를 측정
+	* 메모이제이션을 통해 각 fibonacci(N)을 수행했을 때 fibonacci(1), fibonacci(0) 값을 DP[N].zero, DP[N].one에 각각 저장
+	* 재귀를 이용하여 DP[N] 계산.
+	
+점화식:
+	<Top-Down>
+	DP[N].zero = LEFT.zero + RIGHT.zero
+	DP[N].one = LEFT.one + RIGHT.one
+	
+	<Bottom-Up>
+	DP[N].zero = DP[N-1].zero + DP[N-2].zero
+	DP[N].one = DO[N-1].one + DP[N-2].one
+	
+	
+<Top-Down>
+
+import java.io.*;
+import java.util.*;
+
+
+public class Main {
+
+    final static int NOT_VISIT = -1;
+    static Pair[] dp;
+    static int N;
+
+    public static void main(String args[]) throws Exception {
+
+        FastScanner fs = new FastScanner();
+
+        int T = fs.nextInt();
+
+        dp = new Pair[41];
+
+        dp[0] = new Pair(1,0);
+        dp[1] = new Pair(0,1);
+
+        OutputStream out = new BufferedOutputStream(System.out);
+
+        rec(40);
+
+        for(; T > 0; T--) {
+            int n = fs.nextInt();
+            out.write((dp[n].zero + " " + dp[n].one + "\n").getBytes());
+            out.flush();
+        }
+    }
+
+    public static Pair rec(int n) {
+
+        if(n == 1 || n == 0) return dp[n];
+        if(dp[n] != null) return dp[n];
+
+        dp[n] = new Pair();
+
+        Pair left = rec(n-1);
+        Pair right = rec(n-2);
+
+        dp[n].one = left.one + right.one;
+        dp[n].zero = left.zero + right.zero;
+
+        return dp[n];
+    }
+}
+
+class Pair {
+    public int zero;
+    public int one;
+
+    public Pair() {
+        zero = 0;
+        one = 1;
+    }
+    public Pair(int _zero, int _one) {
+        zero = _zero;
+        one = _one;
+    }
+}
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+    }
+}
+
+	
+	
+<Bottom-Up>
+
+import java.io.*;
+import java.util.*;
+
+
+public class Main {
+
+    final static int NOT_VISIT = -1;
+    static int[][] dp;
+    static int N;
+
+    public static void main(String args[]) throws Exception {
+
+        FastScanner fs = new FastScanner();
+
+        int T = fs.nextInt();
+
+        dp = new int[41][2];
+
+        for(int i = 0; i < 41; ++i)
+            Arrays.fill(dp[i], 0);
+
+        dp[0][0] = 1;
+        dp[1][1] = 1;
+
+        for(int i = 2; i < 41; ++i) {
+            dp[i][0] = dp[i-1][0] + dp[i-2][0];
+            dp[i][1] = dp[i-1][1] + dp[i-2][1];
+        }
+
+        OutputStream out = new BufferedOutputStream(System.out);
+
+        for(; T > 0; T--) {
+            int n = fs.nextInt();
+            out.write((dp[n][0] + " " + dp[n][1] + "\n").getBytes());
+            out.flush();
+        }
+    }
+}
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+    }
+}	
