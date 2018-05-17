@@ -1,0 +1,114 @@
+가장 긴 증가하는 부분 수열
+
+문제
+수열 A가 주어졌을 때, 가장 긴 증가하는 부분 수열을 구하는 프로그램을 작성하시오.
+
+예를 들어, 수열 A = {10, 20, 10, 30, 20, 50} 인 경우에 가장 긴 증가하는 부분 수열은 A = {10, 20, 10, 30, 20, 50} 이고, 길이는 4이다.
+
+입력
+첫째 줄에 수열 A의 크기 N (1 ≤ N ≤ 1,000)이 주어진다.
+
+둘째 줄에는 수열 A를 이루고 있는 Ai가 주어진다. (1 ≤ Ai ≤ 1,000)
+
+출력
+첫째 줄에 수열 A의 가장 긴 증가하는 부분 수열의 길이를 출력한다.
+
+예제 입력 1  복사
+6
+10 20 10 30 20 50
+예제 출력 1  복사
+4
+
+PS:
+	* 아..뻘짓때문에 내 아까운 시간을 날렸다. (체크용 출력문 주석처리 안함..)
+	* 11053(1) 과 다르게 이 풀이 방식은 N번째 숫자가 가질 수 있는 가장 긴 증가하는 부분 수열의 값을 O(NlogN) 만에 찾는다. (lower_bound)
+	* DP[i] 는 i 길이의 가장 긴 증가하는 부분 수열의 맨 마지막에 올 수 있는 가장 작은 값이다.
+	* DP의 길이는 len 변수를 사용한다.
+	* DP[len] 의 값을 채울 때는 세가지 경우로 나누어서 생각한다.
+		1. DP[len] < data  : len 길이의 수열의 마지막 값보다 큰 값이 들어오면 DP 배열 맨 뒤에 붙인다.
+		2. DP[len] == data : len 길이의 수열의 마지막 값과 같은 값이 들어오면 아무런 조작없이 continue
+		3. DP[len] > data  : len 길이의 수열의 마지막 값보다 작은 값이 들어오면 lower_bound(0, len, data)를 통해 data가 들어갈 자리를 찾는다.
+							 이 말은 DP[i] 가 i 길이 수열의 마지막 자리를 가장 작은 값으로 유지하기 때문에 
+							 lower_bound를 통해 찾은 자리에 data를 넣어도 i 길이의 수열의 최장길이에는 아무런 문제가 생기지 않는다.
+
+점화식:
+	( 0 <= i < N ) 
+	DP[len]   = cost[i] if (DP[len] == cost[i])
+	DP[++len] = cost[i] if (DP[len] < cost[i])
+	DP[p] = cost[i]     if (DP[len] > cost[i]) p = lower_bound(0, len, cost[i])
+
+
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    final static int NOT_VISIT = -1;
+    static int[] dp, cost;
+    static int N, len = 0;
+
+    public static void main(String args[]) throws Exception {
+
+        FastScanner fs = new FastScanner();
+
+        N = fs.nextInt();
+
+        dp = new int[N];
+        cost = new int[N];
+
+        for(int i = 0; i < N; ++i)
+            cost[i] = fs.nextInt();
+
+        Arrays.fill(dp, NOT_VISIT);
+
+        dp[0] = cost[0];
+
+        for(int i = 1; i < N; ++i) {
+
+            if(dp[len] == cost[i]) 
+                continue;
+            else if(dp[len] < cost[i]) 
+                dp[++len] = cost[i];
+            else {
+                int p = lower_bound(0, len, cost[i]);
+                dp[p] = cost[i];
+            }
+        }
+        /*
+        for(int i = 0; i <= len; ++i)
+            System.out.print(dp[i] + " ");
+        System.out.println();
+        */
+        System.out.println(len + 1);
+    }
+
+    public static int lower_bound(int left, int right, int data) {
+
+        int mid = (left + right) / 2;
+
+        if(dp[mid] == data) return mid;
+        if(left == right) return left;
+        return (dp[mid] < data) ? lower_bound(mid + 1, right, data) :lower_bound(left, mid, data);
+    }
+}
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+    }
+}

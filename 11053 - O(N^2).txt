@@ -1,0 +1,105 @@
+가장 긴 증가하는 부분 수열 
+
+문제
+수열 A가 주어졌을 때, 가장 긴 증가하는 부분 수열을 구하는 프로그램을 작성하시오.
+
+예를 들어, 수열 A = {10, 20, 10, 30, 20, 50} 인 경우에 가장 긴 증가하는 부분 수열은 A = {10, 20, 10, 30, 20, 50} 이고, 길이는 4이다.
+
+입력
+첫째 줄에 수열 A의 크기 N (1 ≤ N ≤ 1,000)이 주어진다.
+
+둘째 줄에는 수열 A를 이루고 있는 Ai가 주어진다. (1 ≤ Ai ≤ 1,000)
+
+출력
+첫째 줄에 수열 A의 가장 긴 증가하는 부분 수열의 길이를 출력한다.
+
+예제 입력 1  복사
+6
+10 20 10 30 20 50
+예제 출력 1  복사
+4
+
+PS:
+	* O(N^2) 방식으로 풀 것이다.
+	* 메모이제이션을 통해 N의 위치에서 가질 수 있는 가장 긴 수열의 길이를 저장한다.
+	* 재귀를 통해 N의 위치에서 가질 수 있는 가장 긴 수열의 길이를 저장한다.
+	* DP[N]의 최솟값은 1이다. (자기자신도 하나의 수열)
+	* 오름차순, 내림차순, 모든 값이 같은 수열의 경우를 테스트.
+	* 가장 긴 수열의 길이를 출력한다.
+	
+점화식:
+	DP[N] = max(DP[N], max(dp[n-i]) + 1) if( cost[n] > cost[n-i] ), 1 <= i <= n
+	
+	
+import java.io.*;
+import java.util.*;
+
+
+public class Main {
+
+    final static int NOT_VISIT = -1;
+    static int[] dp, cost;
+    static int N;
+
+    public static void main(String args[]) throws Exception {
+
+        FastScanner fs = new FastScanner();
+
+        N = fs.nextInt();
+
+        dp = new int[N];
+        cost = new int[N];
+
+        for(int i = 0; i < N; ++i)
+            cost[i] = fs.nextInt();
+
+        Arrays.fill(dp, NOT_VISIT);
+
+        dp[N-1] = 1;
+
+        rec(0);
+
+        int max = dp[0];
+
+        for(int i = 1; i < N; ++i)
+            max = (max > dp[i]) ? max : dp[i];
+
+        System.out.println(max);
+    }
+
+    public static int rec(int n) {
+
+        if(dp[n] != NOT_VISIT) return dp[n];
+
+        dp[n] = 1;
+
+        for(int i = 1; i < N - n; ++i) {
+            int next = rec(n+i);
+            if(cost[n] < cost[n+i])
+                dp[n] = Math.max(dp[n], next + 1);
+        }
+
+        return dp[n];
+    }
+}
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+    }
+}
