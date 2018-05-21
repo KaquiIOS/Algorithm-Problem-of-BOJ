@@ -1,0 +1,133 @@
+가장 긴 바이토닉 부분 수열 성공 
+
+문제
+수열 S가 어떤 수 Sk를 기준으로 S1 < S2 < ... Sk-1 < Sk > Sk+1 > ... SN-1 > SN을 만족한다면, 그 수열을 바이토닉 수열이라고 한다.
+
+예를 들어, {10, 20, 30, 25, 20}과 {10, 20, 30, 40}, {50, 40, 25, 10} 은 바이토닉 수열이지만,  {1, 2, 3, 2, 1, 2, 3, 2, 1}과 {10, 20, 30, 40, 20, 30} 은 바이토닉 수열이 아니다.
+
+수열 A가 주어졌을 때, 그 수열의 부분 수열 중 바이토닉 수열이면서 가장 긴 수열의 길이를 구하는 프로그램을 작성하시오.
+
+입력
+첫째 줄에 수열 A의 크기 N이 주어지고, 둘째 줄에는 수열 A를 이루고 있는 Ai가 주어진다. (1 ≤ N ≤ 1,000, 1 ≤ Ai ≤ 1,000)
+
+출력
+첫째 줄에 수열 A의 부분 수열 중에서 가장 긴 바이토닉 수열의 길이를 출력한다.
+
+예제 입력 1  복사
+10
+1 5 2 1 4 3 4 5 2 1
+예제 출력 1  복사
+7
+
+Wrong:
+	* 처음에 문제를 잘 이해를 하지 못하여 수열중 가장 큰 값(max_idx)을 기준으로 
+	  1 -> max_idx : 증가하는 수열
+	  max_idx -> 1 : 감소하는 수열
+	  을 구해서 문제를 풀이하려 했으나 잘못된 방법이었다.
+	
+	  일단, 반례를 생각해보면 
+	  1. 가장 큰 값이 여러개 존재하면 답이 달라질 수 있다.
+	  ex) 1 2 7 4 7 3 2 1
+	     -1 2 7 3 2 1
+	     -1 2 4 7 3 2 1
+	  
+	  2. 가장 큰 값이 맨 앞에 있는 경우
+	  ex) 7 4 3 5 4 2 1
+	     실제 정답)
+		 - 4 5 4 2 1 or 3 5 4 2 1
+		 가장 큰 값을 기준으로 증가/감소 수열 탐색)
+		 - 4 3 2 1
+	  
+	  * 한 수열에 여러 바이토닉 수열이 있다. 이 부분을 잘못이해해서 삽질을 했다.
+	    N번째 숫자를 기준으로도 바이토닉 수열을 만들 수 있다는 것을 잘 파악하지 못했다. (문제이해 못함..ㅜ)
+		
+PS:
+
+	* 처음에는 O(NlogN) 방법으로 문제를 풀어보려했으나 Wrong-1 번의 예외에서 제대로 처리할 수 없었다.
+	* 그래서 O(N^2)의 방식으로 문제를 풀었다. 각 N 의 원소를 기준으로 가장 긴 증가/감소하는 수열길이를 측정하여 두 증감 길이를 더하여 최댓값을 사용한다.
+	* 메모이제이션을 통해 DP1[N] 에는 가장 긴 증가하는 수열의 길이를, DP2[N] 에는 가장 긴 감소하는 수열의 길이를 저장한다.
+	* 재귀보단 FOR 반복문을 이용하여 코드를 작성하는게 더 가독성이 좋아서 Bottom-Up 방식으로 품
+	
+	
+
+import java.io.*;
+import java.util.*;
+
+
+public class Main {
+
+    final static int NOT_VISIT = -1;
+    static int[] dp1, dp2, cost;
+    static int N;
+
+    public static void main(String args[]) throws Exception {
+
+        FastScanner fs = new FastScanner();
+
+        N = fs.nextInt();
+
+        dp1 = new int[N];
+        dp2 = new int[N];
+        cost = new int[N];
+
+        for(int i = 0; i < N; ++i)
+            cost[i] = fs.nextInt();
+
+		// 수열의 최소 길이는 1 (자기자신) 이다.
+        Arrays.fill(dp1, 1);
+        Arrays.fill(dp2, 1);
+
+        for(int i = 1; i < N; ++i) {
+			// 가장 긴 증가하는 부분 수열 길이 구하기 ( 0 -> i )
+            for(int j = i - 1; j >= 0; --j)
+                if(cost[j] < cost[i])
+                    dp1[i] = Math.max(dp1[i], dp1[j] + 1);
+			// 가장 긴 감소하는 부분 수열 길이 구하기
+            for(int j = N - i; j < N; ++j) ( N - i -> N )
+                if(cost[j] < cost[N-i-1])
+                    dp2[N-i-1] = Math.max(dp2[j] + 1, dp2[N-i-1]);
+        }
+
+		/*
+        for(int i = 0; i < N; ++i)
+            System.out.print(dp1[i] + " ");
+        System.out.println();
+
+        for(int i = 0; i < N; ++i)
+            System.out.print(dp2[i] + " ");
+        System.out.println();
+		*/
+		
+        int max = -1;
+
+		// i번 인덱스가 겹치
+        for(int i = 0; i < N; ++i)
+            max = (max > dp1[i] + dp2[i]) ? max : dp1[i] + dp2[i];
+
+        System.out.println(max - 1);
+    }
+}
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+    }
+}
+
+	
+	

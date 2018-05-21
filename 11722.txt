@@ -1,0 +1,101 @@
+가장 긴 감소하는 부분 수열 성공 
+
+문제
+수열 A가 주어졌을 때, 가장 긴 감소하는 부분 수열을 구하는 프로그램을 작성하시오.
+
+예를 들어, 수열 A = {10, 30, 10, 20, 20, 10} 인 경우에 가장 긴 감소하는 부분 수열은 A = {10, 30, 10, 20, 20, 10}  이고, 길이는 3이다.
+
+입력
+첫째 줄에 수열 A의 크기 N (1 ≤ N ≤ 1,000)이 주어진다.
+
+둘째 줄에는 수열 A를 이루고 있는 Ai가 주어진다. (1 ≤ Ai ≤ 1,000)
+
+출력
+첫째 줄에 수열 A의 가장 긴 감소하는 부분 수열의 길이를 출력한다.
+
+예제 입력 1  복사
+6
+10 30 10 20 20 10
+예제 출력 1  복사
+3
+
+
+PS:
+	* 가장 긴 증가하는 부분 수열(11053번) 문제에서 List 값을 붙이거나 변경하는 조건을 살짝 바꾸면 되는 문제이다.
+	* 증가하는 수열에서는 DP[len] 값과 비교해서 큰 경우에 len + 1에 그 값을 붙이고, 작은 경우 lower_bound를 이용해 cost[i] 값이 들어갈 자리를 찾았다.
+	* 이와 반대로 DP[len] 값과 비교해서 작은 경우 len + 1에 그 값을 붙이고, 큰 경우 lower_bound를 이용해 cost[i] 값이 들어갈 자리를 찾는다.
+	* 점화식도 조금만 변경하면 된다.
+
+점화식:
+	?
+
+
+
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    final static int NOT_VISIT = -1;
+    static int[] dp, cost;
+    static int N, len = 0;
+
+    public static void main(String args[]) throws Exception {
+
+        FastScanner fs = new FastScanner();
+
+        N = fs.nextInt();
+
+        dp = new int[N];
+        cost = new int[N];
+
+        for(int i = 0; i < N; ++i)
+            cost[i] = fs.nextInt();
+
+        dp[0] = cost[0];
+
+        for(int i = 1; i < N; ++i) {
+
+            if(dp[len] == cost[i])
+                continue;
+            else if(dp[len] > cost[i])
+                dp[++len] = cost[i];
+            else {
+                int p = lower_bound(0, len, cost[i]);
+                dp[p] = cost[i];
+            }
+        }
+
+        System.out.println(len + 1);
+    }
+    
+    public static int lower_bound(int left, int right, int data) {
+
+        int mid = (left + right) / 2;
+
+        if(dp[mid] == data) return mid;
+        if(left == right) return left;
+        return (dp[mid] > data) ? lower_bound(mid + 1, right, data) :lower_bound(left, mid, data);
+    }
+}
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+    }
+}

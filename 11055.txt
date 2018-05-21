@@ -1,0 +1,95 @@
+가장 큰 증가 부분 수열 성공 
+
+문제
+수열 A가 주어졌을 때, 그 수열의 증가 부분 수열 중에서 합이 가장 큰 것을 구하는 프로그램을 작성하시오.
+
+예를 들어, 수열 A = {1, 100, 2, 50, 60, 3, 5, 6, 7, 8} 인 경우에 합이 가장 큰 증가 부분 수열은 A = {1, 100, 2, 50, 60, 3, 5, 6, 7, 8} 이고, 합은 113이다.
+
+입력
+첫째 줄에 수열 A의 크기 N (1 ≤ N ≤ 1,000)이 주어진다.
+
+둘째 줄에는 수열 A를 이루고 있는 Ai가 주어진다. (1 ≤ Ai ≤ 1,000)
+
+출력
+첫째 줄에 수열 A의 합이 가장 큰 증가 부분 수열의 합을 출력한다.
+
+예제 입력 1  복사
+10
+1 100 2 50 60 3 5 6 7 8
+예제 출력 1  복사
+113
+
+PS:
+	* 메모이제이션을 통해 N 번 원소를 기준으로 가장 크게 증가하는 부분 수열의 길이를 저장
+	* 재귀를 통해 N 번 원소를 기준으로 가장 크게 증가하는 부분 수열의 길이를 계산.
+	* O(NlogN) 방식으로 푸는 방법은 조금 더 연구해보겠다.
+	
+	
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    final static int NOT_VISIT = -1;
+    static int[] dp, cost;
+    static int N;
+
+    public static void main(String args[]) throws Exception {
+
+        FastScanner fs = new FastScanner();
+
+        N = fs.nextInt();
+
+        dp = new int[N];
+        cost = new int[N];
+
+        for(int i = 0; i < N; ++i) {
+            cost[i] = fs.nextInt();
+            dp[i] = NOT_VISIT;
+        }
+
+        dp[N-1] = cost[N-1];
+
+        int max = rec(0);
+
+        for(int i = 1; i < N ; ++i)
+            max = (dp[i] < max) ? max : dp[i];
+
+        System.out.println(max);
+    }
+
+    public static int rec(int n) {
+
+        if(dp[n] != NOT_VISIT) return dp[n];
+
+        dp[n] = cost[n];
+
+        for(int i = 1; i < N-n; ++i) {
+            int next = rec(n + i);
+            if(cost[n] < cost[n+i])
+                dp[n] = Math.max(dp[n], cost[n] + next);
+        }
+        return dp[n];
+    }
+
+}
+
+class FastScanner {
+
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    private StringTokenizer st;
+
+    public int nextInt() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Integer.parseInt(st.nextToken());
+    }
+
+    public long nextLong() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return Long.parseLong(st.nextToken());
+    }
+
+    public String nextLine() throws Exception {
+        if (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+        return st.nextToken();
+ 

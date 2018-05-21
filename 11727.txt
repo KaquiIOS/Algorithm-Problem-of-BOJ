@@ -1,0 +1,70 @@
+2×n 타일링 2 성공 
+
+문제
+2×n 직사각형을 2×1과 2×2 타일로 채우는 방법의 수를 구하는 프로그램을 작성하시오.
+
+아래 그림은 2×17 직사각형을 채운 한가지 예이다.
+
+
+
+입력
+첫째 줄에 n이 주어진다. (1 ≤ n ≤ 1,000)
+
+출력
+첫째 줄에 2×n 크기의 직사각형을 채우는 방법의 수를 10,007로 나눈 나머지를 출력한다.
+
+ 
+예제 입력 1  복사
+2
+예제 출력 1  복사
+3
+예제 입력 2  복사
+8
+예제 출력 2  복사
+171
+예제 입력 3  복사
+12
+예제 출력 3  복사
+2731
+
+PS:
+	* 메모이제이션을 통해 길이가 2*N 인 직사각형을 채우는 방법의 수를 기록한다.
+	* 재귀를 통해 2*N인 직사각형을 채우는 방법의 수를 계산한다.
+	* 2xn 타일링 1번 문제와 거의 유사하다.
+
+점화식:
+	DP[N] = (DP[N-1] + DP[N-2]*2)%MOD
+		  = (DP[N-1]%MOD + (DP[N-2]*2)%MOD)
+		  
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static final int NOT_VISIT = -1, MOD = 10007;
+    static int[] dp = new int[1001];
+
+    public static void main(String args[]) throws Exception {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        int n = Integer.parseInt(br.readLine());
+
+        Arrays.fill(dp, NOT_VISIT);
+
+        dp[0] = dp[1] = 1;
+
+        bw.write(rec(n) + "\n");
+        bw.flush();
+    }
+
+    public static int rec(int n) {
+
+        if(dp[n] != NOT_VISIT) return dp[n];
+
+        dp[n] = ((rec(n-1)%MOD) + (rec(n-2) * 2)%MOD)%MOD;
+
+        return dp[n];
+    }
+}
