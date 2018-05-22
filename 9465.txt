@@ -1,0 +1,150 @@
+스티커 성공 한국어   
+
+문제
+상근이의 여동생 상냥이는 문방구에서 스티커 2n개를 구매했다. 스티커는 그림 (a)와 같이 2행 n열로 배치되어 있다. 상냥이는 스티커를 이용해 책상을 꾸미려고 한다.
+
+상냥이가 구매한 스티커의 품질은 매우 좋지 않다. 스티커 한 장을 떼면, 그 스티커와 변을 공유하는 스티커는 모두 찢어져서 사용할 수 없게 된다. 즉, 뗀 스티커의 왼쪽, 오른쪽, 위, 아래에 있는 스티커는 사용할 수 없게 된다.
+
+
+
+모든 스티커를 붙일 수 없게된 상냥이는 각 스티커에 점수를 매기고, 점수의 합이 최대가 되게 스티커를 떼어내려고 한다. 먼저, 그림 (b)와 같이 각 스티커에 점수를 매겼다. 상냥이가 뗄 수 있는 스티커의 점수의 최대값을 구하는 프로그램을 작성하시오. 즉, 2n개의 스티커 중에서 점수의 합이 최대가 되면서 서로 변을 공유 하지 않는 스티커 집합을 구해야 한다.
+
+위의 그림의 경우에 점수가 50, 50, 100, 60인 스티커를 고르면, 점수는 260이 되고 이 것이 최대 점수이다. 가장 높은 점수를 가지는 두 스티커 (100과 70)은 변을 공유하기 때문에, 동시에 뗄 수 없다.
+
+입력
+첫째 줄에 테스트 케이스의 개수 T가 주어진다. 각 테스트 케이스의 첫째 줄에는 n (1 ≤ n ≤ 100,000)이 주어진다. 다음 두 줄에는 n개의 정수가 주어지며, 각 정수는 그 위치에 해당하는 스티커의 점수이다. 연속하는 두 정수 사이에는 빈 칸이 하나 있다. 점수는 0보다 크거나 같고, 100보다 작거나 같은 정수이다. 
+
+출력
+각 테스트 케이스 마다, 2n개의 스티커 중에서 두 변을 공유하지 않는 스티커 점수의 최대값을 출력한다.
+ 
+예제 입력 1  복사
+2
+5
+50 10 100 20 40
+30 50 70 10 60
+7
+10 30 10 50 100 20 40
+20 40 30 50 60 20 80
+
+
+PS:
+	* 메모이제이션을 통해 N번 위, 아래에서 얻을 수 있는 최대 점수를 기록한다.
+	* 재귀를 통해 N번 위, 아래에서 얻을 수 있는 최대 점수를 계산한다.
+	* N번 스티커에서 취할수 있는 행동은 N번을 뜯거나 안뜯거나이다.
+		- 1. 안뜯는다. -> 다음에는 안뜯거나, 위에 스티커를 뜯거나, 아래 스티커를 뜯는 것.
+		- 2. 뜯는다.  -> 다음에는 안뜯거나, 현재 위치가 위면 아래 스티커를 뜯거나, 아래면 위의 스티커를 뜯는 경우이다.
+	
+점화식:
+	DP[POS][N] = max(rec(n + 1, STAY), rec(n + 1, UP), rec(n + 1, DOWN))   if(POS == STAY) 현재 스티커를 안 뜯는경우
+			   = max(rec(n + 1, STAY), rec(n + 1, DOWN)) + cost[pos][n]    if(POS == UP)
+			   = max(rec(n + 1, STAY), rec(n + 1, UP)) + cost[pos][n]	   if(POS == DOWN)
+
+
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static final int STAY = 2, UP = 0, DOWN = 1, NOT_VISIT = -1;
+    static int cost[][] = new int[2][100001], dp[][] = new int[3][100001];
+    static int N;
+
+    public static void main(String args[]) throws Exception {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        int T = Integer.parseInt(br.readLine());
+
+        while (T-- != 0) {
+
+            N = Integer.parseInt(br.readLine());
+
+            StringTokenizer st1 = new StringTokenizer(br.readLine());
+            StringTokenizer st2 = new StringTokenizer(br.readLine());
+
+            for (int i = 0; i < N; ++i) {
+                cost[0][i] = Integer.parseInt(st1.nextToken());
+                cost[1][i] = Integer.parseInt(st2.nextToken());
+            }
+
+            Arrays.fill(dp[0], 0, N, NOT_VISIT);
+            Arrays.fill(dp[1], 0, N, NOT_VISIT);
+            Arrays.fill(dp[2], 0, N, NOT_VISIT);
+
+            bw.write(((Math.max(rec(0, STAY), Math.max(rec(0, UP), rec(0, DOWN))))) + "\n");
+        }
+        bw.flush();
+    }
+
+    public static int rec(int n, int pos) {
+
+        if (n == N) return 0;
+        if (dp[pos][n] != NOT_VISIT) return dp[pos][n];
+
+        dp[pos][n] = 0;
+
+        if (pos == STAY)
+            dp[pos][n] = Math.max(rec(n + 1, STAY), Math.max(rec(n + 1, UP), rec(n + 1, DOWN)));
+        else if (pos == UP)
+            dp[pos][n] = Math.max(rec(n + 1, STAY), rec(n + 1, DOWN)) + cost[pos][n];
+        else if (pos == DOWN)
+            dp[pos][n] = Math.max(rec(n + 1, STAY), rec(n + 1, UP)) + cost[pos][n];
+
+        return dp[pos][n];
+    }
+}
+
+
+PS:
+	* 다른 방법으로 생각해보면 다르게 경우를 나눌 수 있다.
+	* N번 UP 위치에서 가지는 경우를 생각해보면
+		- 1. N번을 안뜯는다. = DP[N-1][UP] 을 그대로 사용
+		- 2. N은 UP, N-1번 DOWN을 뜯는다. 
+		- 3. N은 UP, N-2번 DOWN을 뜯는다. (N,UP)을 뜯으면 (N-1,UP)을 뜯지 못함. (N-2, DOWN)을 뜯으면 (N-2,UP), (N-1,DOWN)을 못뜯음.
+	  결국엔 (N,UP)을 뜯으면 얻을 수 있는 경우는 3가지가 있다.
+	  셋 중에 가장 큰 값을 선택하면 된다.
+	  
+점화식:
+	DP[UP][N] = max(DP[UP][N-1], max(DP[DOWN][N-1], DP[DOWN][N-2]) + cost[UP][N]
+	DP[DOWN][N] = max(DP[DOWN][N-1], max(DP[UP][N-1], DP[UP][N-2]) + cost[DOWN][N]
+
+
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static final int STAY = 2, UP = 0, DOWN = 1, NOT_VISIT = -1;
+    static int cost[][] = new int[2][100010], dp[][] = new int[2][100010];
+    static int N;
+
+    public static void main(String args[]) throws Exception {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        int T = Integer.parseInt(br.readLine());
+
+        while (T-- != 0) {
+
+            N = Integer.parseInt(br.readLine());
+
+            StringTokenizer st1 = new StringTokenizer(br.readLine());
+            StringTokenizer st2 = new StringTokenizer(br.readLine());
+
+            for (int i = 2; i < N + 2; ++i) {
+                cost[0][i] = Integer.parseInt(st1.nextToken());
+                cost[1][i] = Integer.parseInt(st2.nextToken());
+            }
+
+            for(int i = 2; i < N + 2; ++i) {
+                dp[UP][i] = Math.max(dp[UP][i - 1], Math.max(dp[DOWN][i-1] + cost[UP][i], dp[DOWN][i-2] + cost[UP][i]));
+                dp[DOWN][i] = Math.max(dp[DOWN][i - 1], Math.max(dp[UP][i-1] + cost[DOWN][i], dp[UP][i-2] + cost[DOWN][i]));
+            }
+
+            System.out.println(Math.max(dp[UP][N+1], dp[DOWN][N+1]));
+        }
+        bw.flush();
+    }
+}

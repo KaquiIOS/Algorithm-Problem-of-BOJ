@@ -1,0 +1,62 @@
+동전 1 성공 
+
+문제
+n가지 종류의 동전이 있다. 각각의 동전이 나타내는 가치는 다르다. 이 동전들을 적당히 사용해서, 그 가치의 합이 k원이 되도록 하고 싶다. 그 경우의 수를 구하시오. (각각의 동전은 몇 개라도 사용할 수 있다.)
+
+입력
+첫째줄에 n, k가 주어진다. (1 ≤ n ≤ 100, 1 ≤ k ≤ 10,000) 다음 n개의 줄에는 각각의 동전의 가치가 주어진다. 동전의 가치는 100,000보다 작거나 같은 자연수이다.
+
+출력
+첫째 줄에 경우의 수를 출력한다. 경우의 수는 2^31보다 작다.
+
+예제 입력 1  복사
+3 10
+1
+2
+5
+예제 출력 1  복사
+10
+
+PS:
+	* 메모이제이션을 통해 N원을 만들 수 있는 동전 조합의 수를 기록한다.
+	* 반복문을 통해 N원을 만들 수 있는 동전 조합의 수를 계산한다.
+	* J원을 만들 수 있는 방법의 수는 J - coins[i] 원들을 만들 수 있는 방법의 수들을 다 더한 값이다.
+	
+	
+점화식:
+	DP[J] = DP[J] + DP[J-coins[I]]  (coins[i] <= J <= K)
+	
+
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static int[] dp, coins;
+
+    public static void main(String args[]) throws Exception {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        StringTokenizer st = new StringTokenizer(br.readLine());
+
+        int n = Integer.parseInt(st.nextToken());
+        int k = Integer.parseInt(st.nextToken());
+
+        dp = new int[k + 1];
+        coins = new int[n];
+
+        dp[0] = 1;
+
+        for(int i = 0; i < n; ++i)
+            coins[i] = Integer.parseInt(br.readLine());
+
+        for(int i = 0; i < n; ++i) 
+            for(int j = coins[i]; j <= k; ++j) 
+                dp[j] += dp[j - coins[i]];
+            
+        bw.write(dp[k] + "\n");
+        bw.flush();
+    }
+}

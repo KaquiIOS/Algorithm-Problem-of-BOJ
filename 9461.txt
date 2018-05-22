@@ -1,0 +1,62 @@
+파도반 수열 성공 한국어   
+
+문제
+오른쪽 그림과 같이 삼각형이 나선 모양으로 놓여져 있다. 첫 삼각형은 정삼각형으로 변의 길이는 1이다. 
+그 다음에는 다음과 같은 과정으로 정삼각형을 계속 추가한다. 나선에서 가장 긴 변의 길이를 k라 했을 때, 그 변에 길이가 k인 정삼각형을 추가한다.
+
+파도반 수열 P(N)은 나선에 있는 정삼각형의 변의 길이이다. P(1)부터 P(10)까지 첫 10개 숫자는 1, 1, 1, 2, 2, 3, 4, 5, 7, 9이다.
+
+N이 주어졌을 때, P(N)을 구하는 프로그램을 작성하시오.
+
+입력
+첫째 줄에 테스트 케이스의 개수 T가 주어진다. 각 테스트 케이스는 한 줄로 이루어져 있고, N이 주어진다. (1 ≤ N ≤ 100)
+
+출력
+각 테스트 케이스 마다 P(N)을 출력한다.
+
+예제 입력 1  복사
+2
+6
+12
+예제 출력 1  복사
+3
+16
+
+
+PS:
+	* 그림을 보면 N = 6일 때 변의 길이는 N = 5, N = 1일 때의 변의 길이를 합한 길이를 가진다.
+	* N = 7일 때 변의 길이도 N = 6, N = 2일 때의 변의 길이를 합한 것과 같다.
+	* 처음에는 INT 범위에서 처리가 가능할 것 같았는데 그렇지 않았다. (항상 값이 가장 커질때를 생각해볼것)
+	
+점화식:
+	DP[N] = DP[N-1] + DP[N-5] (6 <= N)
+	
+	
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static long[] dp = new long[102];
+    static int N;
+
+    public static void main(String args[]) throws Exception {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        int T = Integer.parseInt(br.readLine());
+
+        dp[1] = dp[2] = dp[3] = 1;
+        dp[4] = dp[5] = 2;
+
+        for(int i = 6; i <= 100; ++i) {
+            dp[i] = dp[i-1] + dp[i - 5];
+        }
+
+        while (T-- != 0) {
+            N = Integer.parseInt(br.readLine());
+            bw.write(dp[N] + "\n");
+        }
+        bw.flush();
+    }
+}
