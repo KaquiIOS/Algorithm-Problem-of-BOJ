@@ -1,0 +1,148 @@
+2차원 배열의 합 성공 
+
+문제
+2차원 배열이 주어졌을 때 (i, j) 위치부터 (x, y) 위치까지에 저장되어 있는 수들의 합을 구하는 프로그램을 작성하시오. 배열의 (i, j) 위치는 i행 j열을 나타낸다.
+
+입력
+첫째 줄에 배열의 크기 N, M(1≤N, M≤300)이 주어진다. 다음 N개의 줄에는 M개의 정수로 배열이 주어진다. 
+그 다음 줄에는 합을 구할 부분의 개수 K(1≤K≤10,000)가 주어진다. 다음 K개의 줄에는 네 개의 정수로 i, j, x, y가 주어진다(i≤x, j≤y).
+
+출력
+K개의 줄에 순서대로 배열의 합을 출력한다. 배열의 합은 32bit-int 범위를 초과하지 않는다.
+
+예제 입력 1  복사
+2 3
+1 2 4
+8 16 32
+3
+1 1 2 3
+1 2 1 2
+1 3 2 3
+예제 출력 1  복사
+63
+2
+36
+
+
+PS:
+	* 처음 풀이를 했을 때 시간이 굉장히 오래 걸려서(1640ms) 점화식에 문제가 있다고 생각하여 점화식 수정하여 다시 풀었다. 시간은 많이 줄어듬(292ms). 짧 - 긴 순서로 설명
+	* 처음에는 DP[N]을 각 행의 합으로 계산하여 포함되지 않는 부분만 제외하고 (I,J) - (X,Y) 까지의 합을 계산한다.
+	* 시간이 오래걸리는 방법은 DP의 방식이 아니라서 제대로 푼 방법이 아니라고 생각된다. (기본적인 최적부분구조, 빈번히 발생하는 중복 문제가 없기때문)
+	
+	* 시간이 짧은 방법만 설명하겠다.
+	* DP[X][Y] : (1,1) - (X,Y) 까지의 합이라고 정의한다.
+	* (1,1) - (N,M) 사이의 합을 구하는 방법은 DP[X][Y]에서 제외된 부분의 값을 빼주면 되는데 이 때 중복이 발생한다.
+	* EX)
+	     <COST>              <DP>
+		1  2  3  4        1   3   6   10
+		5  6  7  8        6   14  24  36
+		9  10 11 12       15  33  54  78
+		13 14 15 16       28  60  96  136
+		
+	일 때 (2,2) - (4,4)의 값은 DP[4][4] - DP[4][1] - DP[1][4] + DP[1][1] 이다.
+	DP[4][4] = (1,1) - (4,4)
+	DP[1][4] = (1,1) - (4,1)
+	DP[4][1] = (1,1) - (1,4) 인데 여기서 (1,1)이 두 번 마이너스가 된다.
+	그래서 마지막으로 한 번 더 빠진 값을 더해준다.
+	위의 방식을 일반화하면 점화식의 형태가 나온다.
+	<오래걸리는 방법의 소스코드는 맨 아래에 있다>
+	
+점화식:
+	ANSWER = DP[X][Y] - DP[X][J-1] - DP[I-1][Y] + DP[I-1][J-1]
+
+
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static int[][] dp = new int[301][301];
+    static int N;
+
+    public static void main(String args[]) throws Exception {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        StringTokenizer st = new StringTokenizer(br.readLine());
+
+        int N = Integer.parseInt(st.nextToken()), M = Integer.parseInt(st.nextToken());
+
+        for(int i = 1; i <= N; ++i) {
+            st = new StringTokenizer(br.readLine());
+            for(int j = 1; j <= M; ++j)
+                dp[i][j] = Integer.parseInt(st.nextToken()) + dp[i][j-1];
+
+            for(int j = 1; j <= M; ++j)
+                dp[i][j] += dp[i-1][j];
+        }
+
+        int T = Integer.parseInt(br.readLine());
+
+        while(T-- != 0) {
+
+            st = new StringTokenizer(br.readLine());
+
+            int i = Integer.parseInt(st.nextToken()), j = Integer.parseInt(st.nextToken());
+            int x = Integer.parseInt(st.nextToken()), y = Integer.parseInt(st.nextToken());
+
+            int ans = dp[x][y] - dp[x][j-1] - dp[i-1][y] + dp[i-1][j-1];
+
+            bw.write(ans + "\n");
+        }
+        bw.flush();
+    }
+}
+	
+	
+	
+	
+< 틀린 방법으로 풀이 >
+
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static int[][] dp = new int[301][301], cost = new int[301][301];
+    static int N;
+
+    public static void main(String args[]) throws Exception {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        StringTokenizer st = new StringTokenizer(br.readLine());
+
+        int N = Integer.parseInt(st.nextToken()), M = Integer.parseInt(st.nextToken());
+
+        for(int i = 1; i <= N; ++i) {
+            st = new StringTokenizer(br.readLine());
+            for(int j = 1; j <= M; ++j) {
+                cost[i][j] = Integer.parseInt(st.nextToken());
+                dp[i][j] = dp[i][j-1] + cost[i][j];
+            }
+        }
+
+        int T = Integer.parseInt(br.readLine());
+
+        while(T-- != 0) {
+
+            st = new StringTokenizer(br.readLine());
+
+            int i = Integer.parseInt(st.nextToken()), j = Integer.parseInt(st.nextToken());
+            int x = Integer.parseInt(st.nextToken()), y = Integer.parseInt(st.nextToken());
+
+            int ans = 0;
+
+            for(int k = i; k <= x; ++k) {
+                int tmp = dp[k][y];
+                for(int t = 1; t < j; ++ t)
+                    tmp -= cost[k][t];
+                ans += tmp;
+            }
+
+            bw.write(ans + "\n");
+        }
+        bw.flush();
+    }
+}
+

@@ -1,0 +1,112 @@
+오르막 수 성공 
+
+문제
+오르막 수는 수의 자리가 오름차순을 이루는 수를 말한다. 이 때, 인접한 수가 같아도 오름차순으로 친다.
+
+예를 들어, 2234와 3678, 11119는 오르막 수이지만, 2232, 3676, 91111은 오르막 수가 아니다.
+
+수의 길이 N이 주어졌을 때, 오르막 수의 개수를 구하는 프로그램을 작성하시오. 수는 0으로 시작할 수 있다.
+
+입력
+첫째 줄에 N (1 ≤ N ≤ 1,000)이 주어진다.
+
+출력
+첫째 줄에 길이가 N인 오르막 수의 개수를 10,007로 나눈 나머지를 출력한다.
+
+예제 입력 1  복사
+1
+예제 출력 1  복사
+10
+예제 입력 2  복사
+2
+예제 출력 2  복사
+55
+예제 입력 3  복사
+3
+예제 출력 3  복사
+220
+
+
+PS:
+	* 한자리 숫자들은 전부다 오르막수이다(DP[0] ~ DP[9] = 1)
+	* 메모이제이션을 통해 M자리수의 맨 마지막 수가 N일 때 가질 수 있는 오르막수의 개수를 저장한다.
+	* 반복문을 통해 'DP[N][M] : N자리 숫자의 마지막 수가 M일 때 가질 수 있는 오르막수의 개수' 를 저장한다.
+	* DP[N][M] 을 계산하는 방법은 아래와 같다.
+	
+		0    1    2    3    4    5    6    7    8    9
+	1	1	 1    1    1    1    1    1    1    1    1
+	2   1    X->2 
+	
+	X는 두자리 숫자 중 마지막 숫자가 1인 오르막 수의 개수이다.
+	그렇다면 마지막수가 1보다 작거나 같은 1자리 숫자들 뒤에 1을 붙여도 오르막 수가 된다.
+	즉, DP[2][1] += DP[1][K] (0 <= K <= 1) 이 된다. DP[2][1] = 2
+	이 방법으로 계속 반복하면 DP[2]는 아래와 같이 채워진다.
+		
+
+		0    1    2    3    4    5    6    7    8    9
+	1	1	 1    1    1    1    1    1    1    1    1
+	2   1    2    3    4    5    6    7    8    9    10
+	
+	그런데, 조금 더 생각해보면 DP[2][7]을 더 빨리 계산할 수 있다.
+	바로 DP[2][6]이 DP[1][6]까지의 합이기 때문에 굳이 하나하나 더할필요는 없다.
+	그래서 DP[N][M-1] + DP[N-1][M]의 합이 DP[N][M]이 된다.
+
+	< 다른 힌트 >
+	DP[1][0] = 0   DP[2][0] = 00
+	DP[1][1] = 1   DP[2][1] = 01, 11
+	DP[1][2] = 2   DP[2][2] = 02, 12, 22
+	    ...
+	
+
+점화식:
+	DP[N][M] = DP[N-1][M] + DP[N][M-1] IF(1 <= N)
+	
+
+	import java.io.*;
+import java.util.*;
+
+public class Main {
+    final static int MOD = 10007;
+    static int[][] dp = new int[1001][10];
+    static int N;
+
+    public static void main(String args[]) throws Exception {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        int N = Integer.parseInt(br.readLine());
+
+        Arrays.fill(dp[1], 1);
+
+        for (int i = 2; i <= N; ++i) {
+            dp[i][0] = 1;
+            for (int j = 1; j <= 9; ++j) {
+                dp[i][j] = (dp[i - 1][j]%MOD + dp[i][j - 1]%MOD)%MOD;
+            }
+        }
+
+        int ans = 0;
+
+        for(int i = 0; i < 10; ++i)
+            ans = (ans%MOD + dp[N][i]%MOD)%MOD;
+
+        bw.write(ans + "\n");
+        bw.flush();
+    }
+}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
