@@ -1,0 +1,145 @@
+이동하기 성공 
+
+문제
+준규는 N×M 크기의 미로에 갇혀있다. 미로는 1×1크기의 방으로 나누어져 있고, 각 방에는 사탕이 놓여져 있다. 미로의 가장 왼쪽 윗 방은 (1, 1)이고, 가장 오른쪽 아랫 방은 (N, M)이다.
+
+준규는 현재 (1, 1)에 있고, (N, M)으로 이동하려고 한다. 준규가 (r, c)에 있으면, (r+1, c), (r, c+1), (r+1, c+1)로 이동할 수 있고, 각 방을 방문할 때마다 방에 놓여져있는 사탕을 모두 가져갈 수 있다. 또, 미로 밖으로 나갈 수는 없다.
+
+준규가 (N, M)으로 이동할 때, 가져올 수 있는 사탕 개수의 최대값을 구하시오.
+
+입력
+첫째 줄에 미로의 크기 N, M이 주어진다. (1 ≤ N, M ≤ 1,000)
+
+둘째 줄부터 N개 줄에는 총 M개의 숫자가 주어지며, r번째 줄의 c번째 수는 (r, c)에 놓여져 있는 사탕의 개수이다. 사탕의 개수는 0보다 크거나 같고, 100보다 작거나 같다.
+
+출력
+첫째 줄에 준규가 (N, M)으로 이동할 때, 가져올 수 있는 사탕 개수를 출력한다.
+
+예제 입력 1  복사
+3 4
+1 2 3 4
+0 0 0 5
+9 8 7 6
+예제 출력 1  복사
+31
+예제 입력 2  복사
+3 3
+1 0 0
+0 1 0
+0 0 1
+예제 출력 2  복사
+3
+예제 입력 3  복사
+4 3
+1 2 3
+6 5 4
+7 8 9
+12 11 10
+예제 출력 3  복사
+47
+
+PS:
+	* 메모이제이션을 통해 DP[I][J]에 (I,J) 에서 (N,M) 까지 갈 때 얻을 수 있는 사탕의 최대 개수를 저장한다.
+	* 반복문을통해 (I,J) 에서 (N,M) 까지 갈 때 얻을 수 있는 사타으이 최대 개수를 계산한다.
+	* 맨 오른쪽 줄은 내려가는 것, 맨 아랫줄은 오른쪽으로 가는 것 밖에 방법이 없기에 미리 계산해두면 편하다 (예외처리를 안해도 됨)
+	* (N-1, M-1)에서부터 (N, M+1), (N+1,M), (N+1,M+1) 위치에 있는 값 중 가장 큰 값을 선택해 현재 값에 더하면 각 자리에서 (N,M) 까지 갈 때 얻을 수 있는 사탕의 최대 개수를 구할 수 있다.
+	
+	* 재귀로 푼다면 dp 배열 이외에 visit 배열을 이용하여 해당 위치를 방문했는지 안했는지를 확인해야한다.
+	
+점화식:
+	DP[N][M] = max(DP[N+1][M], DP[N][M+1], DP[N+1][M+1]) + DP[N][M]
+	DP[N][M] = max(rec(N+1,M), rec(N,M+1), rec(N+1,M+1)) + DP[N][M]
+	
+< 1번 >
+	
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    final static int MAX = 10001;
+    static int[][] dp = new int[1000][1000];
+    static int N, M;
+
+    public static void main(String args[]) throws Exception {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        StringTokenizer st = new StringTokenizer(br.readLine());
+
+        N = Integer.parseInt(st.nextToken()) - 1;
+        M = Integer.parseInt(st.nextToken()) - 1;
+
+        for (int i = 0; i <= N; ++i) {
+            st = new StringTokenizer(br.readLine());
+            for (int j = 0; j <= M; ++j) {
+                dp[i][j] = Integer.parseInt(st.nextToken());
+            }
+        }
+
+        for (int i = N - 1; i >= 0; --i) {
+            dp[i][M] += dp[i + 1][M];
+        }
+
+        for (int i = M - 1; i >= 0; --i) {
+            dp[N][i] += dp[N][i + 1];
+        }
+
+        for (int i = N - 1; i >= 0; --i) {
+            for (int j = M - 1; j >= 0; --j) {
+                dp[i][j] = Math.max(dp[i+1][j], Math.max(dp[i][j+1], dp[i+1][j+1])) + dp[i][j];
+            }
+        }
+
+        System.out.println(dp[0][0]);
+    }
+}
+
+
+< 2번 >
+
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    final static int MAX = 10001;
+    static int[][] dp = new int[1000][1000];
+    static boolean[][] visited = new boolean[1000][1000];
+    static int N, M;
+
+    public static void main(String args[]) throws Exception {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        StringTokenizer st = new StringTokenizer(br.readLine());
+
+        N = Integer.parseInt(st.nextToken()) - 1;
+        M = Integer.parseInt(st.nextToken()) - 1;
+
+        for (int i = 0; i <= N; ++i) {
+            st = new StringTokenizer(br.readLine());
+            for (int j = 0; j <= M; ++j) {
+                dp[i][j] = Integer.parseInt(st.nextToken());
+                visited[i][j] = false;
+            }
+        }
+
+        System.out.println(rec(0, 0));
+    }
+
+    public static int rec(int n, int m) {
+
+        if (n == N && m == M) return dp[n][m];
+        if (N < n || M < m) return 0;
+        if(visited[n][m]) return dp[n][m];
+
+        visited[n][m] = true;
+
+        dp[n][m] = Math.max(rec(n + 1, m), Math.max(rec(n, m + 1), rec(n + 1, m + 1))) + dp[n][m];
+
+        return dp[n][m];
+    }
+}
