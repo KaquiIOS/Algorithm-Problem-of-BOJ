@@ -1,0 +1,70 @@
+타일 채우기 성공 한국어   
+* 한 끗 차이로 틀린 문제
+
+문제
+3×N 크기의 벽을 2×1, 1×2 크기의 타일로 채우는 경우의 수를 구해보자.
+
+입력
+첫째 줄에 N(1 ≤ N ≤ 30)이 주어진다.
+
+출력
+첫째 줄에 경우의 수를 출력한다.
+
+예제 입력 1  복사
+2
+예제 출력 1  복사
+3
+
+PS:
+	* 메모이제이션을 통해 가로의 길이가 N 일 때 만들 수 있는 직사각형 개수를 저장
+	* 반복문을 통해 가로의 길이가 N 일 때 만들 수 있는 직사각형 개수를 계산.
+	* 홀수일 땐 3 x N 크기의 사각형을 만들 수 없다. (한칸이 무조건 남는다)
+	* N = 2M ( 2 <= M <= N/2 )일 때 새로운 사각형 2개를 더 만들 수 있다.
+	* 짝수일 땐 예제를 통해 생각해보면 한 80% 까지 떠오르는데 그 뒤에 생각못하는 부분이 있다.
+	
+	ex)
+		N = 2 , dp[2] = 3 
+		N = 4 , dp[4] = 11
+		
+		N = 2일 땐 그려보면 3개가 나온다.
+		N = 4일 땐 (N = 2에 3개(N=2일 때 나온 것들)를 각각 붙인 개수) + (N = 0일 때 크기가 4인 직사각형 2개를 각각 붙인 개수)
+		N = 6일 땐 (N = 4에 3개를 각각 붙인 것) + (N = 2에 크기가 4인 직사각형 2개 붙인 개수) + (N = 0일 때 크기가 6인 직사각형 2개를 붙인 개수)
+		...
+		
+		
+	와 같은 방식으로 진행된다.
+	그래서 이를 일반화하면 점화식이 된다.
+	
+점화식:
+	( 4 <= N )
+	DP[N] = DP[N-2] * 3 + DP[N-2*T] * 2  ( 2 <= T <= 2/N )
+	
+package SortingAlgorithm;
+
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    
+    static int[] dp = new int[31];
+    static int N;
+
+    public static void main(String args[]) throws Exception {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        N = Integer.parseInt(br.readLine());
+
+        dp[0] = 1; dp[2] = 3;
+
+        for(int i = 4; i <= N; i += 2) {
+            dp[i] = dp[i - 2] * 3;
+            for(int j = 4; j <= i; j += 2)
+                dp[i] += dp[i-j]*2;
+        }
+        bw.write(dp[N] + "\n");
+        bw.flush();
+    }
+}
+
