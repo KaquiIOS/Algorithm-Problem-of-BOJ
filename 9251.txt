@@ -78,6 +78,8 @@ PS:
 	A	0    1    2    2    2    3    4
 	K	0    1    2    3    3    3    4
 	
+점화식:
+	DP[N][M] = (str1[n] == str2[m]) ? Math.max(DP[N][M], DP[N-1][M-1] + 1) : Math.max(DP[N-1][M], DP[N][M-1])
 	
 	
 package SortingAlgorithm;

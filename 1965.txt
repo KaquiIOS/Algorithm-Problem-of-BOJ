@@ -1,0 +1,75 @@
+상자넣기 성공 
+
+문제
+정육면체 모양의 상자들이 일렬로 늘어서 있다. 상자들마다 크기가 주어져 있는데, 앞에 있는 상자의 크기가 뒤에 있는 상자의 크기보다 작으면, 앞에 있는 상자를 뒤에 있는 상자 안에 넣을 수가 있다. 
+예를 들어 앞에서부터 순서대로 크기가 (1, 5, 2, 3, 7)인 5개의 상자가 있다면, 크기 1인 상자를 크기 5인 상자에 넣고, 다시 이 상자들을 크기 7인 상자 안에 넣을 수 있다. 
+하지만 이렇게 상자를 넣을 수 있는 방법은 여러 가지가 있을 수 있다. 앞의 예에서 차례대로 크기가 1, 2, 3, 7인 상자들을 선택하면 총 4개의 상자가 한 개의 상자에 들어가게 된다.
+
+상자들의 크기가 주어질 때, 한 번에 넣을 수 있는 최대의 상자 개수를 출력하는 프로그램을 작성하시오.
+
+입력
+파일의 첫 번째 줄은 상자의 개수 n (1≤n ≤1000)을 나타낸다. 두 번째 줄에는 각 상자들의 크기가 순서대로 주어진다.
+
+출력
+첫째 줄에 한 줄에 넣을 수 있는 최대의 상자 개수를 출력한다.
+
+예제 입력 1  복사
+8
+1 6 2 5 7 3 5 6
+예제 출력 1  복사
+5
+
+PS:
+	* LIS 문제이다. 읽어보다가 뭔가 LIS랑 비슷해서 생각해봤는데 맞았다.
+	* 메모이제이션을 통해 N번 박스가 담을 수 있는 최대 상자 개수를 저장한다.
+	* 반복문을 통해 N번 박스가 담을 수 있는 최대 상자 개수를 계산한다.
+	* 조금 더 빠르게 LIS를 찾기 위해서 lower_bound를 사용한다. -> O(NlogN)
+
+	
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static int[] ls, box;
+    static int N, len = 0;
+
+    public static void main(String args[]) throws Exception {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        N = Integer.parseInt(br.readLine());
+
+        box = new int[N];
+        ls = new int[N];
+
+        StringTokenizer st = new StringTokenizer(br.readLine());
+
+        for (int i = 0; i < N; ++i) {
+            box[i] = Integer.parseInt(st.nextToken());
+        }
+
+        ls[0] = box[0];
+
+        for (int i = 1; i < N; ++i) {
+            if (ls[len] < box[i]) {
+                ls[++len] = box[i];
+            } else if (box[i] < ls[len]) {
+                int p = lower_bound(0, len, box[i]);
+                ls[p] = box[i];
+            }
+        }
+
+        bw.write((len + 1) + "\n");
+        bw.flush();
+    }
+
+    public static int lower_bound(int left, int right, int data) {
+
+        int mid = (left + right) / 2;
+
+        if (ls[mid] == data) return mid;
+        if (right <= left) return left;
+        return (ls[mid] < data) ? lower_bound(mid + 1, right, data) : lower_bound(left, mid , data);
+    }
+}
