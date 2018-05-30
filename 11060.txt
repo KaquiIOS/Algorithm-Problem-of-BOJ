@@ -1,0 +1,98 @@
+점프 점프 성공 
+
+문제
+재환이가 1×N 크기의 미로에 갇혀있다. 미로는 1×1 크기의 칸으로 이루어져 있고, 각 칸에는 숫자가 하나 써있다. 
+i번째 칸에 써있는 숫자를 Ai라고 했을 때, 재환이는 Ai이하만큼 오른쪽으로 떨어진 칸으로 한 번에 점프할 수 있다. 
+예를 들어, 3번째 칸에 써있는 숫자가 3이면, 재환이는 4, 5, 6번 칸 중 하나로 점프할 수 있다.
+
+재환이는 지금 미로의 가장 왼쪽 끝에 있고, 가장 오른쪽 끝으로 가려고 한다. 
+이 때, 최소 몇 번 점프를 해야 갈 수 있는지 구하는 프로그램을 작성하시오. 
+만약, 가장 오른쪽 끝으로 갈 수 없는 경우에는 -1을 출력한다.
+
+입력
+첫째 줄에 N(1 ≤ N ≤ 1,000)이 주어진다. 둘째 줄에는 Ai (0 ≤ Ai ≤ 100)가 주어진다.
+
+출력
+재환이가 최소 몇 번 점프를 해야 가장 오른쪽 끝 칸으로 갈 수 있는지 출력한다. 만약, 가장 오른쪽 끝으로 갈 수 없는 경우에는 -1을 출력한다.
+
+예제 입력 1  복사
+10
+1 2 0 1 3 2 1 5 4 2
+예제 출력 1  복사
+5
+
+PS:
+	* 메모이제이션을 통해 K번 자리에서 N번 자리까지 가는 최소 점프 횟수를 저장한다.
+	* 재귀를 통해 K번 자리에서 N번 자리까지 가는 최소 점프 횟수를 저장한다.
+	* 만약 길이가 1이면 바로 N번에 도착했기에 0 번 점프하면 된다.
+	* 최댓값은 999번 ? 인가 (1-999번에서 1칸씩 전진) 정도이다.
+	* 도착하지 못하면 해당 값을 엄청 큰 값(여기선 20002로 했다.) 을 설정해둔다.
+	* 나중에 답 출력을 할 때 값이 20002면 -1로 변경해서 출력하고 나머지는 그대로 출력한다.
+		
+점화식:
+	DP[N] = min(dp[n], rec(n+i))  (1 <= i <= n)  -> 여러번 도는 것을 방지하기 위해서 그냥 더한 값이 N 이하인 경우만 반복하게 만듬
+	
+	
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static final int NOT_VISIT = -1, MAX = 20002;
+    static int[] dp, jump;
+    static int N;
+
+    static BufferedReader br = null;
+    static BufferedWriter bw = null;
+
+    public static void main(String args[]) throws Exception {
+
+        br = new BufferedReader(new InputStreamReader(System.in));
+        bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        N = Integer.parseInt(br.readLine());
+
+        StringTokenizer st = new StringTokenizer(br.readLine());
+
+        dp = new int[N];
+        jump = new int[N];
+
+        for(int i = 0; i < N; ++i) {
+            jump[i] = Integer.parseInt(st.nextToken());
+            dp[i] = NOT_VISIT;
+        }
+
+        dp[N-1] = 0;
+
+        int ans = rec(0);
+
+        ans = (MAX == ans) ? -1 : ans;
+
+        bw.write(ans + "\n");
+        bw.flush();
+    }
+
+    public static int rec(int n) {
+
+        if(dp[n] != NOT_VISIT) return dp[n];
+
+        dp[n] = MAX;
+
+        for(int i = 1; i <= jump[n] && n + i < N; ++i) 
+            dp[n] = Math.min(dp[n], rec(n + i) + 1);
+        
+        return dp[n];
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+

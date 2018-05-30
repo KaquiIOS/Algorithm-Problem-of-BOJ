@@ -1,0 +1,108 @@
+자두나무 성공 
+시간 제한	메모리 제한	제출	정답	맞은 사람	정답 비율
+2 초	128 MB	4097	1750	1193	41.280%
+문제
+자두는 자두를 좋아한다. 그래서 집에 자두나무를 심어두고, 여기서 열리는 자두를 먹고는 한다. 
+하지만 자두는 키가 작아서 자두를 따먹지는 못하고, 자두가 떨어질 때까지 기다린 다음에 떨어지는 자두를 받아서 먹고는 한다. 
+자두를 잡을 때에는 자두가 허공에 있을 때 잡아야 하는데, 이는 자두가 말랑말랑하여 바닥에 떨어지면 못 먹을 정도로 뭉개지기 때문이다.
+
+매 초마다, 두 개의 나무 중 하나의 나무에서 열매가 떨어지게 된다. 
+만약 열매가 떨어지는 순간, 자두가 그 나무의 아래에 서 있으면 자두는 그 열매를 받아먹을 수 있다. 
+두 개의 나무는 그다지 멀리 떨어져 있지 않기 때문에, 자두는 하나의 나무 아래에 서 있다가 다른 나무 아래로 빠르게(1초보다 훨씬 짧은 시간에) 움직일 수 있다. 
+하지만 자두는 체력이 그다지 좋지 못해서 많이 움직일 수는 없다.
+
+자두는 T(1≤T≤1,000)초 동안 떨어지게 된다. 자두는 최대 W(1≤W≤30)번만 움직이고 싶어 한다. 
+매 초마다 어느 나무에서 자두가 떨어질지에 대한 정보가 주어졌을 때, 자두가 받을 수 있는 자두의 개수를 구해내는 프로그램을 작성하시오. 
+자두는 1번 자두나무 아래에 위치해 있다고 한다.
+
+입력
+첫째 줄에 두 정수 T, W가 주어진다. 다음 T개의 줄에는 각 순간에 자두가 떨어지는 나무의 번호가 1 또는 2로 주어진다.
+
+출력
+첫째 줄에 자두가 받을 수 있는 자두의 최대 개수를 출력한다.
+
+예제 입력 1  복사
+7 2
+2
+1
+1
+2
+2
+1
+1
+예제 출력 1  복사
+6
+
+PS:
+	* 메모이제이션을 통해 T초에 W번 움직여서 먹을 수 있는 자두의 수를 저장한다.
+	* 재귀를 통해 T초에 W번 움직여서 먹을 수 있는 자두의 수를 계산한다.
+	* 현재 위치는 움직인 횟수로 계산할 수 있다. 만약 짝수번(안움직인거 포함)을 움직이면 무조건 1번 자리에 위치한다.
+	  홀수번(1초에 움직인 것 포함) 움직이면 무조건 2번 자리에 위치한다.
+	  W    0    1    2    3    4
+      위치  1    2    1    2    1
+	* dp[w][t] 의 초깃값은 현재 위치와 자두가 떨어지는 위치가 같으면 1 다르면 0으로 설정한다.
+	* 현재 위치에서 반대위치로 움직일 때 얻을 수 있는 자두 수, 현재 위치에 가만히 있을 때 얻을 수 있는 자두의 수 중 큰 값을 더한다.
+	* 만약 움직을 수 있는 횟수를 다 움직였다면 그냥 계속 그자리에서 자두를 받아먹게 한다.
+	
+점화식:	
+	DP[W][T] = ((W % 2) + 1) == PLUM[T] ? 1 : 0 
+	DP[W][T] += max(rec(w + 1, t + 1), rec(w, t + 1))  if( w <= W ) 
+	DP[W][T] += rec(w, t + 1)  if( W < w )
+
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static final int NOT_VISIT = -1;
+    static int[][] dp;
+    static int[] plum;
+    static int T, W;
+
+    static BufferedReader br = null;
+    static BufferedWriter bw = null;
+    static StringTokenizer st = null;
+
+    public static void main(String args[]) throws Exception {
+
+        br = new BufferedReader(new InputStreamReader(System.in));
+        bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        st = new StringTokenizer(br.readLine());
+
+        T = Integer.parseInt(st.nextToken());
+        W = Integer.parseInt(st.nextToken());
+
+        dp = new int[W + 1][T];
+        plum = new int[T];
+
+        for(int i = 0; i <= W; ++i)
+            Arrays.fill(dp[i], NOT_VISIT);
+
+        for(int i = 0; i < T; ++i)
+            plum[i] = Integer.parseInt(br.readLine());
+
+        int ans = Math.max(rec(0, 0), rec(1,0));
+
+        bw.write(ans + "\n");
+        bw.flush();
+    }
+
+    public static int rec(int w, int t) {
+
+        if(T <= t /*|| W < w*/) return 0;
+        if(dp[w][t] != NOT_VISIT) return dp[w][t];
+
+        dp[w][t] = ((w % 2) + 1) == plum[t] ? 1 : 0;
+
+        /*dp[w][t] += Math.max(rec(w, t + 1), rec(w + 1, t + 1));*/
+
+        if(w == W)
+            dp[w][t] += rec(w, t + 1);
+        else
+            dp[w][t] += Math.max(rec(w, t + 1), rec(w+1, t + 1));
+
+        return dp[w][t];
+    }
+}
+
