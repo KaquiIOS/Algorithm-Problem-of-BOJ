@@ -1,0 +1,100 @@
+로봇 조종하기 성공 
+
+문제
+NASA에서는 화성 탐사를 위해 화성에 무선 조종 로봇을 보냈다. 실제 화성의 모습은 굉장히 복잡하지만, 로봇의 메모리가 얼마 안 되기 때문에 지형을 N×M 배열로 단순화 하여 생각하기로 한다.
+
+지형의 고저차의 특성상, 로봇은 움직일 때 배열에서 왼쪽, 오른쪽, 아래쪽으로 이동할 수 있지만, 위쪽으로는 이동할 수 없다. 또한 한 번 탐사한 지역(배열에서 하나의 칸)은 탐사하지 않기로 한다.
+
+각각의 지역은 탐사 가치가 있는데, 로봇을 배열의 왼쪽 위 (1, 1)에서 출발시켜 오른쪽 아래 (N, M)으로 보내려고 한다. 이 때, 위의 조건을 만족하면서, 탐사한 지역들의 가치의 합이 최대가 되도록 하는 프로그램을 작성하시오.
+
+입력
+첫째 줄에 N, M(1≤N, M≤1,000)이 주어진다. 다음 N개의 줄에는 M개의 수로 배열이 주어진다. 배열의 각 수는 절대값이 100을 넘지 않는 정수이다. 이 값은 그 지역의 가치를 나타낸다.
+
+출력
+첫째 줄에 최대 가치의 합을 출력한다.
+
+예제 입력 1  복사
+5 5
+10 25 7 8 13
+68 24 -78 63 32
+12 -69 100 -29 -25
+-16 -22 -57 -33 99
+7 -76 -11 77 15
+예제 출력 1  복사
+319
+
+
+PS:
+	* 메모이제이션을 통해 (I,J) 위치에서 (N,M) 으로 갈 때 얻을 수 있는 최대 점수를 기록한다.
+	* 재귀를 통해 (I,J) 위치에서 (N,M)으로 갈 때 얻을 수 있는 최대 점수를 계산한다.
+	* 이전에 어디서 왔는지를 확인해야 한다.
+		- 이전 칸에서 왼쪽으로 왔으면 왼쪽, 아래쪽으로만 이동 가능. (오른쪽으로 가면 왔던길 다시 돌아가는 것)
+		- 이전 칸에서 오른쪽으로 왔으면 오른쪽, 아래쪽으로만 이동 가능.
+		- 이전 칸에서 아래로 왔으면 왼쪽, 아래쪽, 아래쪽으로 이동 가능.
+	* 이 세게의 경우를 나눠서 재귀함수를 작성하면 된다.
+	* 1000 X 1000 크기에 각 셀의 값이 100인 경우 최댓값은 1억이 된다. (오른쪽 쭉 -> 아래로 한칸 -> 왼쪽 쭉) 반복. 방문안한 지역은 -100000005 정도로 설정
+	
+점화식:
+	DP[I][J][LEFT] = max(DP[I][J][LEFT], max(rec(I, J-1, LEFT), rec(I - 1, J, DOWN)) + cost[I][J])   if(이전방향 == LEFT)
+	DP[I][J][RIGHT] = max(DP[I][J][RIGHT], max(rec(I, J+1, RIGHT), rec(I - 1, J, DOWN)) + cost[I][J]) if(이전방향 == RIGHT)
+	DP[I][J][DOWN] = max(DP[I][J][DOWN], max(rec(I, J-1, LEFT), rec(I, J + 1, RIGHT), rec(I - 1, J, DOWN)) + cost[I][J]) if(이전방향 == DOWN)
+	
+	
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static final int NOT_VISIT = -100000003, LEFT = 0, DOWN = 1, RIGHT = 2;
+    static int[][][] dp = new int[1000][1000][3];
+    static int[][] cost = new int[1000][1000];
+    static int[] dx = {0, 1, 1}, dy = {-1, 0, 1};
+    static int N, M;
+
+    static BufferedReader br = null;
+    static BufferedWriter bw = null;
+    static StringTokenizer st = null;
+
+    public static void main(String args[]) throws Exception {
+
+        br = new BufferedReader(new InputStreamReader(System.in));
+        bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        st = new StringTokenizer(br.readLine());
+
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
+
+        for (int i = 0; i < N; ++i) {
+            st = new StringTokenizer(br.readLine());
+            for (int j = 0; j < M; ++j) {
+                cost[i][j] = Integer.parseInt(st.nextToken());
+                dp[i][j][LEFT] = dp[i][j][DOWN] = dp[i][j][RIGHT] = NOT_VISIT;
+            }
+        }
+
+        dp[N - 1][M - 1][LEFT] = dp[N - 1][M - 1][DOWN] = dp[N - 1][M - 1][RIGHT] = cost[N - 1][M - 1];
+
+        int ans = Math.max(rec(0, 0, LEFT), Math.max(rec(0, 0, DOWN), rec(0, 0, RIGHT)));
+
+        bw.write(ans + "\n");
+        bw.flush();
+    }
+
+    public static int rec(int n, int m, int dir) {
+
+
+        if (n < 0 || N <= n || m < 0 || M <= m) return NOT_VISIT;
+        if (dp[n][m][dir] != NOT_VISIT) return dp[n][m][dir];
+
+        if (dir == LEFT)
+            dp[n][m][dir] = Math.max(dp[n][m][dir], Math.max(rec(n, m - 1, LEFT), rec(n + 1, m, DOWN)) + cost[n][m]);
+        else if (dir == RIGHT)
+            dp[n][m][dir] = Math.max(dp[n][m][dir], Math.max(rec(n + 1, m, DOWN), rec(n, m + 1, RIGHT)) + cost[n][m]);
+        else
+            dp[n][m][dir] = Math.max(dp[n][m][dir], Math.max(rec(n, m - 1, LEFT), Math.max(rec(n + 1, m, DOWN), rec(n, m + 1, RIGHT))) + cost[n][m]);
+
+        return dp[n][m][dir];
+    }
+}
+	
