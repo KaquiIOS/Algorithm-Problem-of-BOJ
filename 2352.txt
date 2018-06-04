@@ -1,0 +1,84 @@
+반도체 설계 성공 
+
+문제
+반도체를 설계할 때 n개의 포트를 다른 n개의 포트와 연결해야 할 때가 있다.
+
+예를 들어 왼쪽 그림이 n개의 포트와 다른 n개의 포트를 어떻게 연결해야 하는지를 나타낸다. 
+하지만 이와 같이 연결을 할 경우에는 연결선이 서로 꼬이기 때문에 이와 같이 연결할 수 없다. 
+n개의 포트가 다른 n개의 포트와 어떻게 연결되어야 하는지가 주어졌을 때, 연결선이 서로 꼬이지(겹치지, 교차하지) 않도록 하면서 최대 몇 개까지 연결할 수 있는지를 알아내는 프로그램을 작성하시오
+
+입력
+첫째 줄에 정수 n(1 ≤ n ≤ 40,000)이 주어진다. 
+다음 줄에는 차례로 1번 포트와 연결되어야 하는 포트 번호, 2번 포트와 연결되어야 하는 포트 번호, …, n번 포트와 연결되어야 하는 포트 번호가 주어진다. 
+이 수들은 1 이상 n 이하이며 서로 같은 수는 없다고 가정하자.
+
+출력
+첫째 줄에 최대 연결 개수를 출력한다.
+
+예제 입력 1  복사
+6
+4 2 6 3 1 5
+예제 출력 1  복사
+3
+
+
+
+PS:
+	* 연결되어야 하는 포트가 정해져있기 때문에 조합의 문제는 아니다.
+	* 연결되어야 하는 포트를 지키면서 가장 길게 연결하는 방법을 찾으면 LIS 문제가 된다.
+	* 메모이제이션을 통해 반도체를 꼬이지 않은 상태로 연결하는 방법을 저장한다.
+	* 반복문을 통해 반도체를 꼬이지 않은 상태로 연결하는 방법을 계산한다.
+	
+점화식:
+	LIS[++len] = data[i]  if(LIS[len] < data[i])
+	LIS[lower_bound()) = data[i]  if(LIS[len] > data[i])
+	
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static int[] dp = new int[40001], lis = new int[40001];
+    static int N, len = 0;
+
+
+    static BufferedReader br = null;
+    static BufferedWriter bw = null;
+    static StringTokenizer st = null;
+
+    public static void main(String args[]) throws Exception {
+
+        br = new BufferedReader(new InputStreamReader(System.in));
+        bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        N = Integer.parseInt(br.readLine());
+
+        st = new StringTokenizer(br.readLine());
+
+        for(int i = 0; i < N; ++i)
+            dp[i] = Integer.parseInt(st.nextToken());
+
+        lis[0] = dp[0];
+
+        for(int i = 0; i < N; ++i) {
+            if(lis[len] < dp[i]) {
+                lis[++len] = dp[i];
+            } else if(lis[len] > dp[i]) {
+                int p = lower_bound(0,len, dp[i]);
+                lis[p] = dp[i];
+            }
+        }
+
+        bw.write((len + 1) + "\n");
+        bw.flush();
+    }
+
+    public static int lower_bound(int left, int right, int data) {
+
+        int mid = (left + right) / 2;
+
+        if(lis[mid] == data) return mid;
+        if(left == right) return left;
+        return (lis[mid] < data) ? lower_bound(mid + 1, right, data) : lower_bound(left, mid, data);
+    }
+}

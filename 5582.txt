@@ -1,0 +1,99 @@
+공통 부분 문자열 성공 한국어   
+
+문제
+두 문자열이 주어졌을 때, 두 문자열에 모두 포함된 가장 긴 공통 부분 문자열을 찾는 프로그램을 작성하시오.
+
+어떤 문자열 s의 부분 문자열 t란, s에 t가 연속으로 나타나는 것을 말한다. 
+예를 들어, 문자열 ABRACADABRA의 부분 문자열은 ABRA, RAC, D, ACADABRA, ABRACADABRA, 빈 문자열 등이다. 
+하지만, ABRC, RAA, BA, K는 부분 문자열이 아니다.
+
+두 문자열 ABRACADABRA와 ECADADABRBCRDARA의 공통 부분 문자열은 CA, CADA, ADABR, 빈 문자열 등이 있다. 
+이 중에서 가장 긴 공통 부분 문자열은 ADABR이며, 길이는 5이다. 
+또, 두 문자열이 UPWJCIRUCAXIIRGL와 SBQNYBSBZDFNEV인 경우에는 가장 긴 공통 부분 문자열은 빈 문자열이다.
+
+입력
+첫째 줄과 둘째 줄에 문자열이 주어진다. 문자열은 대문자로 구성되어 있으며, 길이는 1 이상 4000 이하이다.
+
+출력
+첫째 줄에 두 문자열에 모두 포함 된 부분 문자열 중 가장 긴 것의 길이를 출력한다.
+
+예제 입력 1  복사
+ABRACADABRA
+ECADADABRBCRDARA
+예제 출력 1  복사
+5
+
+
+PS:
+	* 메모이제이션을 통해 str1[0-N], str2[0-M] 의 가장 긴 부분문자열의 길이를 저장한다.
+	* 반복문을 통해 str1[0-N], str2[0-M] 의 가장 긴 부분문자열의 길이를 계산한다.
+	* 마지막 문자가 같으면 이전 공통부분문자열의 길이 + 1 한다.
+	* 마지막 문자가 다르면 0
+	* LCS와 다른 부분은 연속된 문자열의 길이를 구한다는 점이다.
+
+
+		A	B	R	A	C	A	D	A	B	R	A
+	E   0   0   0	0	0	0	0	0	0	0	0
+	C   0	0	0	0	1	0	0	0	0	0	0
+	A   1	0	0	1	0	2	0	0	0	0	1
+	D	0	0	0	0	0	0	3	0	0	0	0
+	A	1	0	0	1	0	1	0	4	0	0	1
+	D	0	0	0	0	0	0	2	0	0	0	0
+	A	1	0	0	1	0	1	0	3	0	0	1
+	B	0	2	0	0	0	0	0	0	4	0	0
+	R	0	0	3	0	0	0	0	0	0	5	0
+	B	0	1	0	0	0	0	0	0	1	0	0
+	C	0	0	0	0	1	0	0	0	0	0	0
+	R	0	0	1	0	0	0	0	0	0	1	0
+	D	0	0	0	0	0	0	1	0	0	0	0
+	A	1	0	0	1	0	1	0	2	0	0	1
+	R	0	0	1	0	0	0	0	0	0	1	0
+	A	1	0	0	2	0	1	0	1	0	0	2
+	
+점화식:
+	DP[I][J] = 0 if(char1.at(i) != char2.at(j))
+	DP[I][J] = DP[I-1][J-1] + 1 if(char1.at(i) == char2.at(j))
+
+
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static int[][] dp;
+    static int N, M;
+
+
+    static BufferedReader br = null;
+    static BufferedWriter bw = null;
+    static StringTokenizer st = null;
+
+    public static void main(String args[]) throws Exception {
+
+        br = new BufferedReader(new InputStreamReader(System.in));
+        bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        String str1 = br.readLine();
+        String str2 = br.readLine();
+
+        N = str1.length();
+        M = str2.length();
+
+        dp = new int[N + 1][M + 1];
+
+        int maxLen = 0;
+
+        for(int i = 1; i <= N; ++i) {
+            char ch1 = str1.charAt(i - 1);
+            for(int j = 1; j <= M; ++j) {
+                if(str2.charAt(j - 1) == ch1) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                    maxLen = Math.max(maxLen, dp[i][j]);
+                }
+            }
+        }
+
+        bw.write(maxLen + "\n");
+        bw.flush();
+    }
+}
