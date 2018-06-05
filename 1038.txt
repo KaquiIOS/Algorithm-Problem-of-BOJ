@@ -1,0 +1,68 @@
+감소하는 수 성공 
+
+문제
+음이 아닌 정수 X의 자릿수가 가장 큰 자릿수부터 작은 자릿수까지 감소한다면, 그 수를 감소하는 수라고 한다. 
+예를 들어, 321과 950은 감소하는 수지만, 322와 958은 아니다. N번째 감소하는 수를 출력하는 프로그램을 작성하시오. 
+0은 0번째 감소하는 수이고, 1은 1번째 감소하는 수이다. 만약 N번째 감소하는 수가 없다면 -1을 출력한다.
+
+입력
+첫째 줄에 N이 주어진다. N은 1,000,000보다 작거나 같은 자연수 또는 0이다.
+
+출력
+첫째 줄에 N번째 감소하는 수를 출력한다.
+
+예제 입력 1  복사
+18
+예제 출력 1  복사
+42
+
+
+PS:
+	* 해법이 생각나지 않아 다른 고수의 해법을 보고 공부하고 푼 문제
+	* 처음에 왜 N >= 1022 개를 넘어가면 만들 수 있는 수가 없는지 몰랐다. 코딩으로 모든 경우를 만들어보고 아..! 그런거구만 하면서 알게됨.
+	  {0, 1, 2, 3, 4, 5, 6, 7, 8, 9} 집합에서 만들 수 있는 감소하는 수는 2^10 - 1개 라고한다.
+	* N = 1022 => 9876543210 이므로 다른 감소하는 수는 만들 수 없다.
+	* 큐를 이용하여 N번째 수를 만들었다.
+	
+	
+
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static Queue<Long> q = new ArrayDeque();
+    static long[] dp = new long[100001];
+    static int N, idx = 10;
+
+    public static void main(String args[]) throws Exception {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        N = Integer.parseInt(br.readLine());
+
+        if(N < 0 || N >= 1023) {
+            bw.write("-1");
+        } else {
+            for(long i = 0; i <= 9; ++i) {
+                q.add(i);
+                dp[(int)i] = i;
+            }
+            while(!q.isEmpty() && idx <= N) {
+
+                long front = q.poll();
+
+                long last = front % 10;
+
+                for(long i = 0; i < last && idx <= N; ++i) {
+                    long nextVal = front * 10 + i;
+                    dp[idx++] = nextVal;
+                    q.add(nextVal);
+                }
+            }
+            bw.write(dp[N] + "\n");
+        }
+        bw.flush();
+    }
+}

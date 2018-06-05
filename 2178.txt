@@ -1,0 +1,121 @@
+미로 탐색 성공 
+
+문제
+N×M크기의 배열로 표현되는 미로가 있다.
+
+1	0	1	1	1	1
+1	0	1	0	1	0
+1	0	1	0	1	1
+1	1	1	0	1	1
+미로에서 1은 이동할 수 있는 칸을 나타내고, 0은 이동할 수 없는 칸을 나타낸다. 이러한 미로가 주어졌을 때, (1, 1)에서 출발하여 (N, M)의 위치로 이동할 때 지나야 하는 최소의 칸 수를 구하는 프로그램을 작성하시오.
+
+위의 예에서는 15칸을 지나야 (N, M)의 위치로 이동할 수 있다. 칸을 셀 때에는 시작 위치와 도착 위치도 포함한다.
+
+입력
+첫째 줄에 두 정수 N, M(2≤N, M≤100)이 주어진다. 다음 N개의 줄에는 M개의 정수로 미로가 주어진다. 각각의 수들은 붙어서 입력으로 주어진다.
+
+출력
+첫째 줄에 지나야 하는 최소의 칸 수를 출력한다. 항상 도착위치로 이동할 수 있는 경우만 입력으로 주어진다.
+
+예제 입력 1  복사
+4 6
+101111
+101010
+101011
+111011
+예제 출력 1  복사
+15
+예제 입력 2  복사
+4 6
+110110
+110110
+111111
+111101
+예제 출력 2  복사
+9
+
+
+PS:
+	* maze[i][j] = 각 정점에 도착할 때까지 최소 스텝
+	* 방문하지 못하는 지역은 -1로 설정
+	
+	
+	
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static final int MAX = 987654321;
+    static int N, M;
+
+    static int[][] maze = new int[101][101];
+    static boolean[][] isVisited = new boolean[101][101];
+    static int[] dx = {-1, 1, 0, 0}, dy = {0, 0, -1, 1};
+
+    static BufferedReader br;
+    static BufferedWriter bw;
+    static StringTokenizer st;
+
+    public static void main(String args[]) throws Exception {
+
+        br = new BufferedReader(new InputStreamReader(System.in));
+        bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        st = new StringTokenizer(br.readLine());
+
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
+
+        for (int i = 0; i < N; ++i) {
+            String m = br.readLine();
+            for (int j = 0; j < M; ++j)
+                maze[i][j] = (m.charAt(j) - '0' == 0) ? -1 : MAX;
+        }
+
+        bw.write(BFS() + "\n");
+        bw.flush();
+    }
+
+    static class Point {
+
+        public int x;
+        public int y;
+
+        public Point(int _x, int _y) {
+            x = _x;
+            y = _y;
+        }
+    }
+
+    public static int BFS() {
+
+        Queue<Point> q = new ArrayDeque<>();
+
+        q.add(new Point(0, 0));
+        isVisited[0][0] = true;
+        maze[0][0] = 1;
+
+        Point p = null;
+
+        while (!q.isEmpty()) {
+
+            p = q.poll();
+
+            if(p.x == N - 1 && p.y == M - 1) break;
+
+            for (int i = 0; i < 4; ++i) {
+                int nx = p.x + dx[i];
+                int ny = p.y + dy[i];
+
+                if (nx < 0 || N <= nx || ny < 0 || M <= ny) continue;
+                if (isVisited[nx][ny] || maze[nx][ny] == -1) continue;
+
+                isVisited[nx][ny] = true;
+                maze[nx][ny] = maze[p.x][p.y] + 1;
+                q.add(new Point(nx, ny));
+            }
+        }
+        return maze[N-1][M-1];
+    }
+}
