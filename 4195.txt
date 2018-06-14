@@ -1,0 +1,153 @@
+친구 네트워크 성공 한국어   
+
+문제
+민혁이는 소셜 네트워크 사이트에서 친구를 만드는 것을 좋아하는 친구이다. 
+우표를 모으는 취미가 있듯이, 민혁이는 소셜 네트워크 사이트에서 친구를 모으는 것이 취미이다.
+
+어떤 사이트의 친구 관계가 생긴 순서대로 주어졌을 때, 가입한 두 사람의 친구 네트워크에 몇 명이 있는지 구하는 프로그램을 작성하시오.
+
+친구 네트워크란 친구 관계만으로 이동할 수 있는 사이를 말한다.
+
+입력
+첫째 줄에 테스트 케이스의 개수가 주어진다. 
+각 테스트 케이스의 첫째 줄에는 친구 관계의 수 F가 주어지며, 이 값은 100,000을 넘지 않는다. 
+다음 F개의 줄에는 친구 관계가 생긴 순서대로 주어진다. 
+친구 관계는 두 사용자의 아이디로 이루어져 있으며, 알파벳 대문자 또는 소문자로만 이루어진 길이 20 이하의 문자열이다.
+
+출력
+친구 관계가 생길 때마다, 가입한 두 사람의 친구 네트워크에 몇 명이 있는지 구하는 프로그램을 작성하시오.
+
+예제 입력 1  복사
+2
+3
+Fred Barney
+Barney Betty
+Betty Wilma
+3
+Fred Barney
+Betty Wilma
+Barney Betty
+예제 출력 1  복사
+2
+3
+4
+2
+2
+4
+
+PS:
+	* Union-Find 알고리즘과 Map을 사용해서 문제 풀이
+	* 친구의 수가 최대가 되는 경우는 각 친구 관계의 이름이 전부 다 다른 경우이다. 즉 100000 * 2 개의 다른 이름이 존재할 수 있다.
+	* 출력은 bufferedWritter로 하자 (시간이 반이나 준다)
+	* Tuple 클래스를 따로 만들어서 사용했다.
+		- 노드 번호
+		- 부모 노드 번호
+		- 자식 노드들의 수 (본인 포함)
+	* 입력된 이름인지 아닌지는 Map<String, Integer> 를 통해 새로운 이름이 들어오면 <이름, 이전 번호++> 의 방식으로 추가한다.
+	* 원래 있던 이름이면 Map 에서 가져온다.
+	
+	
+	
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static BufferedReader br;
+    static BufferedWriter bw;
+    static StringTokenizer st;
+
+    static int N, M, T;
+
+    static class Tuple {
+        int num;
+        int parent;
+        int numNode;
+        public Tuple() {}
+        public Tuple(int _num, int _parent, int _numNode) {
+            num = _num;
+            parent = _parent;
+            numNode = _numNode;
+        }
+    }
+    static HashMap<String, Integer> list = new HashMap<>();
+    static Tuple[] arr = null;
+
+    public static void main(String args[]) throws Exception {
+
+        br = new BufferedReader(new InputStreamReader(System.in));
+        bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+        T = Integer.parseInt(br.readLine());
+
+        for (int i = 0; i < T; ++i) {
+
+            int pos = 0;
+
+            N = Integer.parseInt(br.readLine());
+            // 최대 노드수는 각 친구관계에 포함된 이름이 다른 경우 -> 친구관계 * 2
+            arr = new Tuple[N * 2 + 1];
+
+            for (int j = 0; j < N; ++j) {
+
+                String[] input = br.readLine().split(" ");
+
+                String f1 = input[0];
+                String f2 = input[1];
+
+                boolean hasEnrolled1 = list.containsKey(f1);
+                boolean hasEnrolled2 = list.containsKey(f2);
+
+                int f1Idx = 0, f2Idx = 0;
+
+                if(!hasEnrolled1) {
+                    f1Idx = pos;
+                    arr[f1Idx] = new Tuple(pos, pos, 1);
+                    list.put(f1, pos++);
+                } else {
+                    f1Idx = list.get(f1);
+                }
+                if(!hasEnrolled2) {
+                    f2Idx = pos;
+                    arr[f2Idx] = new Tuple(pos, pos, 1);
+                    list.put(f2, pos++);
+                } else {
+                    f2Idx = list.get(f2);
+                }
+
+                int ans = unionParent(f1Idx, f2Idx);
+
+                bw.write(ans + "\n");
+            }
+            bw.flush();
+            list.clear();
+        }
+    }
+
+
+    public static int findParent(int n) {
+        if(arr[n].parent == n) return n;
+        return arr[n].parent = findParent(arr[n].parent);
+    }
+
+    public static int unionParent(int n1, int n2) {
+
+        n1 = findParent(n1);
+        n2 = findParent(n2);
+
+        // 이미 같은 그래프에 연결되어 있는 경우
+        if(n1 == n2) return arr[n1].numNode;
+
+        if(n1 < n2) {
+            arr[n2].parent = n1;
+            arr[n1].numNode += arr[n2].numNode;
+            return arr[n1].numNode;
+        } else {
+            arr[n1].parent = n2;
+            arr[n2].numNode += arr[n1].numNode;
+            return arr[n2].numNode;
+        }
+    }
+}
+	
+
