@@ -505,8 +505,181 @@
 
 8. BellmanFord
 
+	* 특정 지점에서 다른 지점까지의 최단 거리를 구하는 알고리즘
+	* 음의 가중치를 가지는 간선이 존재할 수 있다. 
+	* 음의 순환은 존재하면 안된다. (간선까지의 비용이 음의 무한대가 된다)
+	* 경로의 최대 길이는 V - 1이다. ( 최단 경로의 길이가 V 이상이면 음의 사이클이 존재하는 경우이다. )
+		- 일직선 경로가 있고 A -> F 까지의 최단거리를 생각해보자
+		  (A -> B -> C -> D -> E -> F)
+		  최단거리는 (V - 1)개의 간선을 가진다.
+	* O(VE) 시간 복잡도를 가진다.
+	* 각 정점에서 인접한 노드들과 거리 갱신을 V - 1번을 수행하면 최단거리를 구할 수 있다.
+	* 마지막에 한 번 더 갱신을 시도해서 값이 갱신된다면 이는 음의 사이클이 존재한다고 판명할 수 있다.
+	* boolean 변수를 하나 이용하여 갱신이 한 번도 이뤄지지 않으면 이미 최단거리를 다 계산한 경우이므로 반복문 종료.
+	
+	< 1. BOJ 11657번 예제 > https://www.acmicpc.net/problem/11657
+	< 2. BOJ 1865 번 예제 > https://www.acmicpc.net/problem/1865
+	
+	/* 11657번 문제 */
+	
+	import java.io.*;
+	import java.util.*;
 
+	public class Main {
 
+		static BufferedReader br;
+		static BufferedWriter bw;
+		static StringTokenizer st;
+
+		static class Edge {
+			int next;
+			int cost;
+
+			public Edge(int next, int cost) {
+				this.next = next;
+				this.cost = cost;
+			}
+		}
+
+		static final int INF = 1987654321;
+		static int T, V, E;
+		static long[] dist = new long[510];
+
+		static ArrayList<Edge>[] adList = new ArrayList[501];
+
+		public static void main(String args[]) throws Exception {
+
+			br = new BufferedReader(new InputStreamReader(System.in));
+			bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+			st = new StringTokenizer(br.readLine());
+
+			V = Integer.parseInt(st.nextToken());
+			E = Integer.parseInt(st.nextToken());
+
+			for(int i = 0; i <= V; ++i) {
+				adList[i] = new ArrayList<>();
+				dist[i] = INF;
+			}
+			
+			for(int i = 0; i < E; ++i) {
+				st = new StringTokenizer(br.readLine());
+
+				int s = Integer.parseInt(st.nextToken());
+				int e = Integer.parseInt(st.nextToken());
+				int c = Integer.parseInt(st.nextToken());
+
+				adList[s].add(new Edge(e,c));
+			}
+
+			boolean isUpdated = bellmanFord(1);
+
+			if(isUpdated)
+				bw.write("-1\n");
+			else
+				for(int i = 2; i <= V; ++i)
+					bw.write((dist[i] == INF ? -1 : dist[i]) + "\n");
+
+			bw.flush();
+		}
+
+		public static boolean bellmanFord(int start) {
+
+			// 시작점 0 설정
+			dist[start] = 0;
+			// 마지막에 Update가 된 경우엔 음의 사이클이 존재한다.
+			boolean isRelaxed = false;
+
+			for(int i = 1; i <= V; ++i) {
+				isRelaxed = false;
+				for(int j = 1; j <= V; ++j) {
+					int len = adList[j].size();
+					// 경로 최단거리 갱신
+					for(int k = 0; k < len; ++k) {
+						if(dist[j] + adList[j].get(k).cost < dist[adList[j].get(k).next]) {
+							dist[adList[j].get(k).next] = dist[j] + adList[j].get(k).cost;
+							isRelaxed = true;
+						}
+					}
+				}
+				// 갱신이 한번도 이뤄지지 않으면 최단거리 탐색 끝
+				if(!isRelaxed) break;
+			}
+			// True 인 경우 음의 사이클 존재
+			// False 인 경우 최단거리 탐색 완료
+			return isRelaxed;
+		}
+	}
+	
+	
+	
 9. Floyd - Warshall
 
+	* 다익스트라, 벨만 포드 알고리즘과 다르게 모든 정점 사이의 최단 거리를 파악하는 알고리즘
+	* 플로이드 워셜 알고리즘도 최단거리는 최단거리로 이뤄져있다는 전제하에 알고리즘 실행
+	* 시작 정점 -> 거쳐가는 정점 -> 도착 정점의 최단 거리를 구함 -> 각 각의 최단거리가 최종 최단거리를 만드는 알고리즘
+	* 다익스트라 혹은 벨만포드를 여러번 쓰는 알고리즘과 동일하지 않을까 ? 라는 생각을 해봄 (그러면 벨만포드를 여러번 쓰는게 낫지않남 ?)
+	* 시간 복잡도는 O(N^3) 소요
+	
+	
+	< 1. BOJ 11403번 예제 > https://www.acmicpc.net/problem/11403
+	< 2. BOJ 11404번 예제 > https://www.acmicpc.net/problem/11404
+		
+	/* 11403 문제 */
+	
+	import java.io.*;
+	import java.util.*;
 
+	public class Main {
+
+		static BufferedReader br;
+		static BufferedWriter bw;
+		static StringTokenizer st;
+
+		static class Edge {
+			int next;
+			int cost;
+
+			public Edge(int next, int cost) {
+				this.next = next;
+				this.cost = cost;
+			}
+		}
+
+		static int N;
+		static int[][] connection = new int[101][101];
+
+		public static void main(String args[]) throws Exception {
+
+			br = new BufferedReader(new InputStreamReader(System.in));
+			bw = new BufferedWriter(new OutputStreamWriter(System.out));
+
+			N = Integer.parseInt(br.readLine());
+
+			for(int i = 0; i < N; ++i) {
+				st = new StringTokenizer(br.readLine());
+				for(int j = 0; j < N; ++j)
+					connection[i][j] = Integer.parseInt(st.nextToken());
+			}
+
+			floyd_warshall();
+
+			for(int i = 0; i < N; ++i) {
+				for(int j = 0; j < N; ++j)
+					bw.write(connection[i][j] + " ");
+				bw.write("\n");
+			}
+
+			bw.flush();
+		}
+
+		public static void floyd_warshall() {
+
+			for(int inter = 0; inter < N; ++inter)  // 거쳐가는 지점
+				for(int start = 0; start < N; ++start)  // 시작 지점
+					for(int dest = 0; dest < N; ++dest)  // 도착 지점
+						if(connection[start][inter] == 1 && connection[inter][dest] == 1)
+							connection[start][dest] = 1;
+					
+		}
+	}
