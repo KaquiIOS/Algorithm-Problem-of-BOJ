@@ -1,0 +1,187 @@
+임계경로 성공 
+
+문제
+월드 나라는 모든 도로가 일방통행인 도로이고, 싸이클이 없다. 
+그런데 어떤 무수히 많은 사람들이 월드 나라의 지도를 그리기 위해서, 어떤 시작 도시로부터 도착 도시까지 출발을 하여 가능한 모든 경로를 탐색한다고 한다.
+
+그런데 이 지도를 그리는 사람들은 사이가 너무 좋아서 지도를 그리는 일을 다 마치고 도착 도시에서 모두 다 만나기로 하였다. 
+그렇다고 하였을 때 이들이 만나는 시간은 출발 도시로부터 출발한 후 최소 몇 시간 후에 만날 수 있는가? (즉 마지막에 도착하는 사람까지 도착을 하는 시간).
+
+그런데 어떤 사람은 이 시간에 만나기 위하여 1분도 쉬지 않고 달려야 하는 사람이 있을 것이다. 
+이런 사람들이 지나는 도로의 수를 카운트 하여라.
+
+출발 도시는 들어오는 도로가 0개이고, 도착 도시는 나가는 도로가 0개이다.
+
+입력
+첫째 줄에 도시의 개수 n(1≤n≤10,000)이 주어지고 둘째 줄에는 도로의 개수 m(1≤m≤100,000)이 주어진다. 
+그리고 셋째 줄부터 m+2줄까지 다음과 같은 도로의 정보가 주어진다. 
+처음에는 도로의 출발 도시의 번호가 주어지고 그 다음에는 도착 도시의 번호, 그리고 마지막에는 이 도로를 지나는데 걸리는 시간이 주어진다. 
+도로를 지나가는 시간은 10,000보다 작거나 같은 자연수이다.
+
+그리고 m+3째 줄에는 지도를 그리는 사람들이 출발하는 출발 도시와 도착 도시가 주어진다.
+
+출력
+첫째 줄에는 이들이 만나는 시간을, 둘째 줄에는 1분도 쉬지 않고 달려야 하는 도로의 수가 몇 개인지 출력하여라.
+
+예제 입력 1  복사
+7
+9
+1 2 4
+1 3 2
+1 4 3
+2 6 3
+2 7 5
+3 5 1
+4 6 4
+5 6 2
+6 7 5
+1 7
+예제 출력 1  복사
+12
+5
+
+PS:
+	* 역추적하는게 살짝 어려웠다.
+	* maxBuildTime 에는 각 도시에 모든 사람이 도착할 때까지의 시간을 기록
+	  도착지점부터 역으로 이전 도시를 방문하는데 maxBuildTime[현재 도시] - 이전 도시로 가는 비용 == maxBuildTime[이전 도시] 이면 이는 임계경로가 된다.
+	  예제에서 maxBuildTime 배열은 아래와 같다.
+	  
+	  1  2  3  4  5  6  7
+	  0  4  2  3  3  7  12
+	
+	  이 때 역추적 연결 그래프를 보면
+	  7 -> (6,5) , (2, 5)
+	  ...
+	  
+	  로 되어있는데 maxBuildTime[7] - 6으로 가는 비용 == maxBuildTime[6] 이 된다. 즉 6번은 7번까지 오기위한 임계 경로에 포함된다는 으미미이다.
+	  다 해보면 임계 경로에 포함된 도시는 1, 2, 4, 6, 7 이 된다.
+	  
+	  
+	  
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static StringBuilder sb;
+    static BufferedReader br;
+    static BufferedWriter bw;
+    static StringTokenizer st;
+
+    static int N, M, S, E;
+
+    static class Edge {
+        int cur;
+        int cost;
+
+        public Edge(int cur, int cost) {
+            this.cur = cur;
+            this.cost = cost;
+        }
+    }
+
+    static int[] maxBuildTime = new int[10001], inDegree = new int[10001];
+    static boolean[] check = new boolean[10001];
+    static ArrayList<Edge>[] DAG = new ArrayList[10001], reverse = new ArrayList[10001];
+
+    public static void main(String args[]) throws Exception {
+
+        br = new BufferedReader(new InputStreamReader(System.in));
+        bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        sb = new StringBuilder();
+
+        N = Integer.parseInt(br.readLine());
+        M = Integer.parseInt(br.readLine());
+
+        for (int i = 0; i <= N; ++i) {
+            DAG[i] = new ArrayList<>();
+            reverse[i] = new ArrayList<>();
+        }
+        for (int i = 0; i < M; ++i) {
+            st = new StringTokenizer(br.readLine());
+
+            int s = Integer.parseInt(st.nextToken());
+            int e = Integer.parseInt(st.nextToken());
+            int c = Integer.parseInt(st.nextToken());
+
+            reverse[e].add(new Edge(s, c));
+            DAG[s].add(new Edge(e, c));
+            inDegree[e]++;
+        }
+
+        st = new StringTokenizer(br.readLine());
+        S = Integer.parseInt(st.nextToken());
+        E = Integer.parseInt(st.nextToken());
+
+        int ans = topologySort(S);
+
+        bw.write(maxBuildTime[E] + "\n");
+        bw.write(ans + "\n");
+        bw.flush();
+    }
+
+
+    public static int topologySort(int start) {
+
+        Queue<Edge> q = new ArrayDeque<>();
+
+        q.add(new Edge(start, 0));
+
+        // 각 경로에서 출발할 수 있는 시간 기록
+        for (int i = 0; i < N; ++i) {
+
+            Edge e = q.poll();
+
+            int len = DAG[e.cur].size();
+
+            for (int j = 0; j < len; ++j) {
+                Edge next = DAG[e.cur].get(j);
+                if (--inDegree[next.cur] == 0)
+                    q.add(next);
+                maxBuildTime[next.cur] = Math.max(maxBuildTime[next.cur], maxBuildTime[e.cur] + next.cost);
+            }
+        }
+
+        q.clear();
+
+        int ans = 0;
+        // 1분도 쉬지 않는 경로 = 최장 경로
+        // 도착지점에서 역으로 출발하여 COST를 빼고나서 그 값이 최장경로의 값이면 임계경로에 포함
+        q.add(new Edge(E, 0));
+
+        while(!q.isEmpty()) {
+
+            Edge e = q.poll();
+
+            int len = reverse[e.cur].size();
+
+            for (int j = 0; j < len; ++j) {
+                Edge next = reverse[e.cur].get(j);
+                // 현재 위치 최대 - 이전 노드까지 비용 == 이전 노드까지 최대 ==> 최대 경로 포함
+                if (maxBuildTime[e.cur] - next.cost == maxBuildTime[next.cur]) {
+                    // 도시는 한 번만 포함시키기
+					if(!check[next.cur]) {
+						check[next.cur] = true;
+						q.add(next);
+					}
+                    ans++;
+                }
+            }
+        }
+        return ans;
+    }
+}
+	  
+	  
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
