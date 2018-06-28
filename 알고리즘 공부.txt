@@ -1148,16 +1148,111 @@
 6. A* 
 	
 	
-11. NetworkFlow
+11. NetworkFlow (최대유량문제)
 
+	* 네트워크에서 특정 지점 -> 다른 지점 사이에 보낼 수 있는 최대 용량을 확인하는 알고리즘
+	* 포드 폴커슨, 에드몬드 카프 알고리즘이 있다. 두 알고리즘의 차이점은 경로 확인 방식이다. 포드 폴커슨 = DFS, 에드몬드 카프 = BFS
+	* 각 지점에서 보낼 수 있는 양(유량), 각 지점에서 받을 수 있는 양(용량) 을 이용하여 유량을 최대로 만드는 알고리즘.
+	* 알고리즘 특징
+		- 유량이 각 간선의 용량보다 클 수 없다.
+		- 각 정점이 받는 양과 내보내는 양이 같아야한다. (중간 지점이므로 나가는 것과 들어오는 것이 차이가 있으면 이는 Leak 이 발생한 것)
+		- 음의 유량을 고려하여 보낼 수 있는 최대 유량을 확인한다.(A->B 유량 : 5 ==> B->A 유량 : -5)
+	
+	
+13. Bipartite Matching
+	
+	* 특정한 형태의 네트워크 플로우 모양을 띈 경우 사용할 수 있는 알고리즘
+	* 각 유량/용량이 무조건 1로 설정된 네트워크
+	* 집단이 두개로 명확히 나뉘는 경우 사용가능
+	* A 집단 -> B 집단 을 최대로 많이 매칭하는 경우를 찾을 수 있음
+	* DFS 를 이용해 최대한 많은 매칭을 구하는 알고리즘
+   ** 현재 작업을 수행하고 있는 녀석이 이동할 수 있는지 확인해야한다. (절대로 그냥 연결된 노드를 기준으로 확인하지 말자)
 
+	* BFS 말고 DFS를 이용하는 이유는 
+
+	/* 생긴게 뉴럴넷같이 생겼다 */
+	
+	
+	< 1. BOJ 11375번 예제 > https://www.acmicpc.net/problem/11375
+	
+	
+	/* 11375번 예제 */
+	
+	package SortingAlgorithm;
+
+	import java.io.*;
+	import java.util.*;
+
+	public class Main {
+
+		static StringBuilder sb = new StringBuilder();
+		static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		static BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+		static StringTokenizer st;
+
+		static final int MAX = 1010;
+
+		static int V, E;
+		static ArrayList<Integer>[] graph = new ArrayList[MAX];
+		static boolean[] isVisited =  new boolean[MAX];
+		static int[] owner = new int[MAX];
+
+		public static void main(String args[]) throws Exception {
+
+			st = new StringTokenizer(br.readLine());
+
+			V = Integer.parseInt(st.nextToken());
+			E = Integer.parseInt(st.nextToken());
+
+			// 그래프 초기화
+			for (int i = 1; i <= V; ++i) {
+				graph[i] = new ArrayList<>();
+				st = new StringTokenizer(br.readLine());
+				st.nextToken();
+
+				while(st.hasMoreTokens())
+					graph[i].add(Integer.parseInt(st.nextToken()));
+			}
+
+			int ans = 0;
+
+			for (int i = 1; i <= V; ++i) {
+				if(DFS(i)) ans++;
+				Arrays.fill(isVisited, 0, E + 1, false);
+			}
+
+			bw.write(ans + "\n");
+			bw.flush();
+		}
+
+		public static boolean DFS(int start) {
+
+			if(isVisited[start]) return false;
+			isVisited[start] = true;
+
+			Iterator<Integer> it = graph[start].iterator();
+
+			while(it.hasNext()) {
+				// 연결된 다음 노드
+				int next = it.next();
+
+				// 현재 위치를 선점하고 있는 노드가 다른 곳으로 갈 수 있으면 보내고 자기가 선점한다.
+				if (owner[next] == 0 || DFS(owner[next])) {
+					owner[next] = start;
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	
+	
 12. Sliding Window
 
 
 16. SagementTree
 
-
-13. Bipartite Matching
 
 
 14. String Matching

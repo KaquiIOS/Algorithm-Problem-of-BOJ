@@ -1,0 +1,117 @@
+트리 성공
+
+문제
+트리에서 리프 노드란, 자식의 개수가 0인 노드를 말한다.
+
+트리가 주어졌을 때, 노드 중 하나를 제거할 것이다. 그 때, 남은 트리에서 리프 노드의 개수를 구하는 프로그램을 작성하시오.
+
+예를 들어, 다음과 같은 트리가 있다고 하자.
+
+
+
+현재 리프 노드의 개수는 3개이다. (초록색 색칠된 노드) 이 때, 1번을 제거한다고 하면, 다음과 같이 된다.
+
+
+
+이제 리프 노드의 개수는 1개이다.
+
+입력
+첫째 줄에 트리의 노드의 개수 N이 주어진다. N은 50보다 작거나 같은 자연수이다. 
+둘째 줄에는 0번 노드부터 N-1번 노드까지, 각 노드의 부모가 주어진다. 만약 부모가 없다면 (루트) -1이 주어진다. 
+셋째 줄에는 지울 노드의 번호가 주어진다.
+
+출력
+첫째 줄에 입력으로 주어진 트리에서 입력으로 주어진 노드를 지웠을 때, 리프 노드의 개수를 출력한다.
+
+예제 입력 1 
+5
+-1 0 0 1 1
+2
+예제 출력 1 
+2
+
+PS:
+	* 하나도 안어려운 문제를 가지고 왜이리 못풀었지..
+	* 처음에 문제를 잘못이해..
+	* 쉬운건데......
+	
+	
+	
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static StringBuilder sb = new StringBuilder();
+    static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    static BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+    static StringTokenizer st;
+
+    static int N, M, start;
+    static ArrayList<Integer>[] graph = new ArrayList[51];
+    static int[] parent = new int[51];
+
+    public static void main(String args[]) throws Exception {
+
+        N = Integer.parseInt(br.readLine());
+
+        for (int i = 0; i < 51; ++i) {
+            graph[i] = new ArrayList<>();
+            parent[i] = -3;
+        }
+
+        st = new StringTokenizer(br.readLine());
+
+        for (int i = 0; i < N; ++i) {
+            parent[i]= Integer.parseInt(st.nextToken());
+            if (parent[i] == -1) {
+                start = i;
+            } else
+                graph[parent[i]].add(i);
+        }
+
+        M = Integer.parseInt(br.readLine());
+
+        if (start == M) {
+            bw.write("0\n");
+        } else {
+			// 삭제할 노드의 부모에서 삭제할 노드를 지운다.
+            Iterator<Integer> it = graph[parent[M]].iterator();
+
+            while(it.hasNext()) {
+                int next = it.next();
+                if(next == M) {
+                    it.remove();
+                    break;
+                }
+            }
+			// BFS 리프노드 수 리턴
+            int ans = BFS(start);
+            bw.write(ans + "\n");
+        }
+        bw.flush();
+    }
+
+
+    public static int BFS(int start) {
+
+        int ans = 0;
+
+        Queue<Integer> q = new ArrayDeque<>(Arrays.asList(start));
+
+        while (!q.isEmpty()) {
+
+            int next = q.poll();
+			// 뽑혔는데 연결된 노드가 없으면 리프 노드
+            if (graph[next].size() == 0)
+                ans++;
+            // 자식이 있는 노드면 큐에 다 추가
+			else
+                for (int i = 0; i < graph[next].size(); ++i)
+                    q.add(graph[next].get(i));
+        }
+
+        return ans;
+    }
+
+}	
